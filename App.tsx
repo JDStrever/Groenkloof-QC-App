@@ -26,6 +26,7 @@ import LoginPage from './components/LoginPage';
 import UserManagementPage from './components/admin/UserManagementPage';
 import AddMrlPage from './components/mrl/AddMrlPage';
 import MrlListPage from './components/mrl/MrlListPage';
+import * as supabaseStorage from './utils/supabaseStorage';
 
 const PROTECTED_VIEWS: View[] = [
     View.RUN_SETUP, View.QC_LIST, View.PLAAS_SETUP, View.ONTVANGS_QC_LIST, View.MRL, View.MRL_LIST, View.MRL_ADD, View.ADMIN, View.QUALITY_SUMMARY
@@ -39,6 +40,13 @@ const DEFAULT_RUN_CONFIG: RunConfig = {
     varietyOptions: ['Valencia', 'Navel', 'Star Ruby', 'Eureka']
 };
 
+const INITIAL_ADMIN: User = {
+    id: 'user-admin-jd',
+    username: 'JD',
+    password: 'JD',
+    permissions: Object.values(View)
+};
+
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>(View.HOME);
   const [runs, setRuns] = useState<Run[]>([]);
@@ -46,7 +54,7 @@ const App: React.FC = () => {
   const [mrlRecords, setMrlRecords] = useState<MrlRecord[]>([]);
   const [selectedRun, setSelectedRun] = useState<Run | null>(null);
   const [selectedDelivery, setSelectedDelivery] = useState<Delivery | null>(null);
-  const [commodityData, setCommodityData] = useState<CommodityData>({});
+  const [commodityData, setCommodityData] = useState<CommodityData>(DEFAULT_COMMODITY_SIZES);
   const [cartonConfig, setCartonConfig] = useState<CartonConfig>(DEFAULT_CARTON_CONFIG);
   const [runConfig, setRunConfig] = useState<RunConfig>(DEFAULT_RUN_CONFIG);
   const [isReadOnlyView, setIsReadOnlyView] = useState(false);
@@ -54,83 +62,81 @@ const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
 
-
+  // Load Data from Supabase on Mount
   useEffect(() => {
-    try {
-        const storedCommodityData = localStorage.getItem('commodityData');
-        if (storedCommodityData) setCommodityData(JSON.parse(storedCommodityData));
-        else {
-            setCommodityData(DEFAULT_COMMODITY_SIZES);
-            localStorage.setItem('commodityData', JSON.stringify(DEFAULT_COMMODITY_SIZES));
-        }
+    const loadData = async () => {
+        try {
+            // Parallel fetching for performance
+            const [
+                fetchedRuns,
+                fetchedDeliveries,
+                fetchedMrls,
+                fetchedCommodityData,
+                fetchedCartonConfig,
+                fetchedRunConfig,
+                fetchedUsers
+            ] = await Promise.all([
+                supabaseStorage.fetchRuns(),
+                supabaseStorage.fetchDeliveries(),
+                supabaseStorage.fetchMrls(),
+                supabaseStorage.fetchSetting<CommodityData>('commodityData', DEFAULT_COMMODITY_SIZES),
+                supabaseStorage.fetchSetting<CartonConfig>('cartonConfig', DEFAULT_CARTON_CONFIG),
+                supabaseStorage.fetchSetting<RunConfig>('runConfig', DEFAULT_RUN_CONFIG),
+                supabaseStorage.fetchSetting<User[]>('users', [INITIAL_ADMIN])
+            ]);
 
-        const storedCartonConfig = localStorage.getItem('cartonConfig');
-        if (storedCartonConfig) setCartonConfig(JSON.parse(storedCartonConfig));
-        else {
-            setCartonConfig(DEFAULT_CARTON_CONFIG);
-            localStorage.setItem('cartonConfig', JSON.stringify(DEFAULT_CARTON_CONFIG));
-        }
+            setRuns(fetchedRuns);
+            setDeliveries(fetchedDeliveries);
+            setMrlRecords(fetchedMrls);
+            setCommodityData(fetchedCommodityData);
+            setCartonConfig(fetchedCartonConfig);
+            setRunConfig(fetchedRunConfig);
+            setUsers(fetchedUsers);
 
-        const storedRunConfig = localStorage.getItem('runConfig');
-        if (storedRunConfig) setRunConfig(JSON.parse(storedRunConfig));
-        else {
-            setRunConfig(DEFAULT_RUN_CONFIG);
-            localStorage.setItem('runConfig', JSON.stringify(DEFAULT_RUN_CONFIG));
-        }
+            // Handle session persistence
+            const sessionUser = sessionStorage.getItem('currentUser');
+            if (sessionUser) {
+                const parsedUser = JSON.parse(sessionUser);
+                // Validate if user still exists in fetched users
+                const validUser = fetchedUsers.find(u => u.username === parsedUser.username);
+                if (validUser) {
+                    setCurrentUser(validUser);
+                } else {
+                    sessionStorage.removeItem('currentUser');
+                    setCurrentView(View.LOGIN);
+                }
+            } else {
+                 // Removed auto-redirect to LOGIN on mount to allow landing page visibility, 
+                 // but protected views check will enforce it.
+            }
 
-        const storedUsers = localStorage.getItem('users');
-        if (storedUsers) {
-            setUsers(JSON.parse(storedUsers));
-        } else {
-            const initialAdmin: User = {
-                id: 'user-admin-jd',
-                username: 'JD',
-                password: 'JD',
-                permissions: Object.values(View)
-            };
-            const initialUsers = [initialAdmin];
-            setUsers(initialUsers);
-            localStorage.setItem('users', JSON.stringify(initialUsers));
+        } catch (error) {
+            console.error("Failed to load data from Supabase", error);
+            alert("Failed to connect to the database. Please check your internet connection.");
         }
-
-        const storedMrlRecords = localStorage.getItem('mrlRecords');
-        if (storedMrlRecords) {
-            setMrlRecords(JSON.parse(storedMrlRecords));
-        }
-
-        const sessionUser = sessionStorage.getItem('currentUser');
-        if (sessionUser) {
-            setCurrentUser(JSON.parse(sessionUser));
-        } else {
-            setCurrentView(View.LOGIN);
-        }
-
-    } catch (error) {
-        console.error("Failed to load or parse data from localStorage", error);
-        setCommodityData(DEFAULT_COMMODITY_SIZES);
-        setCartonConfig(DEFAULT_CARTON_CONFIG);
-    }
+    };
+    loadData();
   }, []);
 
 
-  const handleCommodityDataUpdate = (newCommodityData: CommodityData) => {
+  const handleCommodityDataUpdate = async (newCommodityData: CommodityData) => {
     setCommodityData(newCommodityData);
-    localStorage.setItem('commodityData', JSON.stringify(newCommodityData));
+    await supabaseStorage.saveSetting('commodityData', newCommodityData);
   };
 
-  const handleCartonConfigUpdate = (newCartonConfig: CartonConfig) => {
+  const handleCartonConfigUpdate = async (newCartonConfig: CartonConfig) => {
     setCartonConfig(newCartonConfig);
-    localStorage.setItem('cartonConfig', JSON.stringify(newCartonConfig));
+    await supabaseStorage.saveSetting('cartonConfig', newCartonConfig);
   };
   
-  const handleRunConfigUpdate = (newRunConfig: RunConfig) => {
+  const handleRunConfigUpdate = async (newRunConfig: RunConfig) => {
       setRunConfig(newRunConfig);
-      localStorage.setItem('runConfig', JSON.stringify(newRunConfig));
+      await supabaseStorage.saveSetting('runConfig', newRunConfig);
   }
   
-  const handleUsersUpdate = (updatedUsers: User[]) => {
+  const handleUsersUpdate = async (updatedUsers: User[]) => {
     setUsers(updatedUsers);
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
+    await supabaseStorage.saveSetting('users', updatedUsers);
   }
 
   const handleNavigate = (view: View, readOnly: boolean = false, entry: any = null) => {
@@ -142,7 +148,7 @@ const App: React.FC = () => {
         return;
     }
 
-    if (currentUser && isProtected && !currentUser.permissions.includes(view)) {
+    if (currentUser && isProtected && !currentUser.permissions.includes(view) && !currentUser.permissions.includes(View.ADMIN)) {
         alert('You do not have permission to access this page.');
         return; 
     }
@@ -173,7 +179,7 @@ const App: React.FC = () => {
   };
 
   const handleLogin = (username: string, password: string): boolean => {
-    const user = users.find(u => u.username === username && u.password === password);
+    const user = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
     if (user) {
         setCurrentUser(user);
         sessionStorage.setItem('currentUser', JSON.stringify(user));
@@ -190,24 +196,26 @@ const App: React.FC = () => {
     setCurrentView(View.LOGIN);
   };
 
-  const handleRunCreated = (newRunData: Omit<Run, 'id'>) => {
+  const handleRunCreated = async (newRunData: Omit<Run, 'id'>) => {
     const newRun: Run = { ...newRunData, id: `run-${Date.now()}` };
-    setRuns(prev => [...prev, newRun]);
+    setRuns(prev => [newRun, ...prev]); // Add to top
     setCurrentView(View.QC_LIST);
+    await supabaseStorage.createRun(newRun);
   };
 
-  const handleDeliveryCreated = (newDeliveryData: Omit<Delivery, 'id'>) => {
+  const handleDeliveryCreated = async (newDeliveryData: Omit<Delivery, 'id'>) => {
     const newDelivery: Delivery = { ...newDeliveryData, id: `delivery-${Date.now()}` };
-    setDeliveries(prev => [...prev, newDelivery]);
+    setDeliveries(prev => [newDelivery, ...prev]);
     setCurrentView(View.ONTVANGS_QC_LIST);
+    await supabaseStorage.createDelivery(newDelivery);
   };
 
-  const handleMrlRecordCreated = (newRecordData: Omit<MrlRecord, 'id'>) => {
+  const handleMrlRecordCreated = async (newRecordData: Omit<MrlRecord, 'id'>) => {
     const newRecord: MrlRecord = { ...newRecordData, id: `mrl-${Date.now()}` };
-    const updatedRecords = [...mrlRecords, newRecord];
+    const updatedRecords = [newRecord, ...mrlRecords];
     setMrlRecords(updatedRecords);
-    localStorage.setItem('mrlRecords', JSON.stringify(updatedRecords));
     setCurrentView(View.MRL_LIST);
+    await supabaseStorage.createMrl(newRecord);
   };
 
   const handleSelectRun = (run: Run) => {
@@ -220,57 +228,58 @@ const App: React.FC = () => {
     setCurrentView(View.ONTVANGS_QC);
   };
 
-  const handleSaveInspection = (deliveryId: string, qualityData: ExternalQualityData, defectsData: DefectsData, internalQualityData: InternalQualityData, photos: string[]) => {
+  const handleSaveInspection = async (deliveryId: string, qualityData: ExternalQualityData, defectsData: DefectsData, internalQualityData: InternalQualityData, photos: string[]) => {
     const newDeliveries = deliveries.map(d => 
       d.id === deliveryId ? { ...d, externalQuality: qualityData, defects: defectsData, internalQuality: internalQualityData, photos: photos, inspectionCompletedDate: new Date().toISOString().split('T')[0] } : d
     );
     setDeliveries(newDeliveries);
     const updatedDelivery = newDeliveries.find(d => d.id === deliveryId);
-    if (updatedDelivery) setSelectedDelivery(updatedDelivery);
+    if (updatedDelivery) {
+        setSelectedDelivery(updatedDelivery);
+        await supabaseStorage.updateDelivery(updatedDelivery);
+    }
     alert('Inspection data saved successfully!');
+  };
+
+  const updateRunStateAndDB = async (runId: string, updater: (run: Run) => Run) => {
+    const newRuns = runs.map(r => r.id === runId ? updater(r) : r);
+    setRuns(newRuns);
+    const updatedRun = newRuns.find(r => r.id === runId);
+    if (updatedRun) {
+        setSelectedRun(updatedRun);
+        setCurrentView(View.QC_RUN);
+        await supabaseStorage.updateRun(updatedRun);
+    }
   };
 
   const handleSaveSizing = (runId: string, sizingData: SizingData) => {
     const newEntry: SizingEntry = { id: `sizing-${Date.now()}`, timestamp: new Date().toISOString(), data: sizingData, approvalDetails: { status: 'pending' } };
-    const newRuns = runs.map(r => r.id === runId ? { ...r, sizingData: [...(r.sizingData || []), newEntry] } : r);
-    setRuns(newRuns);
-    setSelectedRun(newRuns.find(r => r.id === runId) || null);
-    setCurrentView(View.QC_RUN);
+    updateRunStateAndDB(runId, r => ({ ...r, sizingData: [...(r.sizingData || []), newEntry] }));
   };
 
   const handleSaveCartonWeights = (runId: string, cartonWeights: CartonWeightSample[]) => {
     const newEntry: CartonWeightsEntry = { id: `cartonweights-${Date.now()}`, timestamp: new Date().toISOString(), samples: cartonWeights, approvalDetails: { status: 'pending' } };
-    const newRuns = runs.map(r => r.id === runId ? { ...r, cartonWeights: [...(r.cartonWeights || []), newEntry] } : r);
-    setRuns(newRuns);
-    setSelectedRun(newRuns.find(r => r.id === runId) || null);
-    setCurrentView(View.QC_RUN);
+    updateRunStateAndDB(runId, r => ({ ...r, cartonWeights: [...(r.cartonWeights || []), newEntry] }));
   };
 
   const handleSaveCartonEvaluation = (runId: string, cartonEvaluations: CartonEvaluationSample[]) => {
     const newEntry: CartonEvaluationEntry = { id: `cartoneval-${Date.now()}`, timestamp: new Date().toISOString(), samples: cartonEvaluations, approvalDetails: { status: 'pending' } };
-    const newRuns = runs.map(r => r.id === runId ? { ...r, cartonEvaluations: [...(r.cartonEvaluations || []), newEntry] } : r);
-    setRuns(newRuns);
-    setSelectedRun(newRuns.find(r => r.id === runId) || null);
-    setCurrentView(View.QC_RUN);
+    updateRunStateAndDB(runId, r => ({ ...r, cartonEvaluations: [...(r.cartonEvaluations || []), newEntry] }));
   };
 
   const handleSaveClassEvaluation = (runId: string, classEvaluations: ClassEvaluationSample[]) => {
      const newEntry: ClassEvaluationEntry = { id: `classeval-${Date.now()}`, timestamp: new Date().toISOString(), samples: classEvaluations, approvalDetails: { status: 'pending' } };
-    const newRuns = runs.map(r => r.id === runId ? { ...r, classEvaluations: [...(r.classEvaluations || []), newEntry] } : r);
-    setRuns(newRuns);
-    setSelectedRun(newRuns.find(r => r.id === runId) || null);
-    setCurrentView(View.QC_RUN);
+     updateRunStateAndDB(runId, r => ({ ...r, classEvaluations: [...(r.classEvaluations || []), newEntry] }));
   };
 
   const handleSaveFinalPalletQc = (runId: string, finalPalletQc: FinalPalletQcData[]) => {
     const newEntry: FinalPalletQcEntry = { id: `palletqc-${Date.now()}`, timestamp: new Date().toISOString(), pallets: finalPalletQc, approvalDetails: { status: 'pending' } };
-    const newRuns = runs.map(r => r.id === runId ? { ...r, finalPalletQc: [...(r.finalPalletQc || []), newEntry] } : r);
-    setRuns(newRuns);
-    setSelectedRun(newRuns.find(r => r.id === runId) || null);
-    setCurrentView(View.QC_RUN);
+    updateRunStateAndDB(runId, r => ({ ...r, finalPalletQc: [...(r.finalPalletQc || []), newEntry] }));
   };
 
-  const handleApproveQc = (runId: string, qcType: keyof Omit<Run, 'id' | 'runNumber' | 'puc' | 'farmName' | 'boord' | 'exporter' | 'commodity' | 'variety'>, entryId: string, username: string) => {
+  const handleApproveQc = async (runId: string, qcType: keyof Omit<Run, 'id' | 'runNumber' | 'puc' | 'farmName' | 'boord' | 'exporter' | 'commodity' | 'variety'>, entryId: string, username: string) => {
+    let updatedRunCopy: Run | null = null;
+    
     const newRuns = runs.map(r => {
         if (r.id === runId) {
             const updatedRun = { ...r };
@@ -282,19 +291,22 @@ const App: React.FC = () => {
                 return entry;
             });
             (updatedRun as any)[qcType] = updatedEntries;
+            updatedRunCopy = updatedRun;
             return updatedRun;
         }
         return r;
     });
     setRuns(newRuns);
-    const updatedRun = newRuns.find(r => r.id === runId);
-    setSelectedRun(updatedRun || null);
-    if(updatedRun) handleNavigate(View.QUALITY_SUMMARY, false);
+    if(updatedRunCopy) {
+        setSelectedRun(updatedRunCopy);
+        handleNavigate(View.QUALITY_SUMMARY, false);
+        await supabaseStorage.updateRun(updatedRunCopy);
+    }
   };
 
 
   const renderContent = () => {
-    if (!currentUser) return <LoginPage onLogin={handleLogin} />;
+    if (!currentUser && PROTECTED_VIEWS.includes(currentView)) return <LoginPage onLogin={handleLogin} />;
 
     switch (currentView) {
       case View.RUN_SETUP:
