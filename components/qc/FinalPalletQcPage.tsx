@@ -199,21 +199,21 @@ const FinalPalletQcPage: React.FC<FinalPalletQcPageProps> = ({ run, onSave, comm
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-grow">
                                     <div>
                                         <Label htmlFor={`size-${pallet.id}`}>Size</Label>
-                                        <select id={`size-${pallet.id}`} value={pallet.size} onChange={e => handlePalletDetailChange(pallet.id, 'size', e.target.value)} className="mt-1 block w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-100 disabled:bg-slate-800 disabled:cursor-not-allowed" disabled={isReadOnly}>
+                                        <select id={`size-${pallet.id}`} value={pallet.size} onChange={e => handlePalletDetailChange(pallet.id, 'size', e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-900 disabled:bg-slate-100 disabled:cursor-not-allowed" disabled={isReadOnly}>
                                             <option value="">Select Size</option>
                                             {sizes.map(s => <option key={s.code} value={s.code}>{s.code}</option>)}
                                         </select>
                                     </div>
                                     <div>
                                         <Label htmlFor={`class-${pallet.id}`}>Class</Label>
-                                        <select id={`class-${pallet.id}`} value={pallet.class} onChange={e => handlePalletDetailChange(pallet.id, 'class', e.target.value)} className="mt-1 block w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-100 disabled:bg-slate-800 disabled:cursor-not-allowed" disabled={isReadOnly}>
+                                        <select id={`class-${pallet.id}`} value={pallet.class} onChange={e => handlePalletDetailChange(pallet.id, 'class', e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-900 disabled:bg-slate-100 disabled:cursor-not-allowed" disabled={isReadOnly}>
                                             <option value="">Select Class</option>
                                             {classes.map(c => <option key={c} value={c}>{c}</option>)}
                                         </select>
                                     </div>
                                     <div>
                                         <Label htmlFor={`boxType-${pallet.id}`}>Box Type</Label>
-                                        <select id={`boxType-${pallet.id}`} value={pallet.boxType} onChange={e => handlePalletDetailChange(pallet.id, 'boxType', e.target.value)} className="mt-1 block w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-100 disabled:bg-slate-800 disabled:cursor-not-allowed" disabled={isReadOnly}>
+                                        <select id={`boxType-${pallet.id}`} value={pallet.boxType} onChange={e => handlePalletDetailChange(pallet.id, 'boxType', e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-900 disabled:bg-slate-100 disabled:cursor-not-allowed" disabled={isReadOnly}>
                                             <option value="">Select Box Type</option>
                                             {boxTypes.map(bt => <option key={bt.name} value={bt.name}>{bt.name}</option>)}
                                         </select>

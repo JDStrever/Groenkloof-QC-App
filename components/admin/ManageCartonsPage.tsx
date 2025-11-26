@@ -131,7 +131,7 @@ const ManageCartonsPage: React.FC<ManageCartonsPageProps> = ({ initialCartonConf
               id="commodity-select"
               value={selectedCommodity}
               onChange={e => setSelectedCommodity(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md shadow-sm text-slate-100 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+              className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm text-slate-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
             >
               {Object.keys(commodityData).map(name => (
                 <option key={name} value={name}>{name}</option>

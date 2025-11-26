@@ -58,7 +58,7 @@ const RunSetupPage: React.FC<RunSetupPageProps> = ({ onRunCreated, runConfig, co
               name="puc"
               value={formData.puc}
               onChange={handleChange}
-              className="mt-1 block w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-md shadow-sm text-slate-100 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+              className="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-md shadow-sm text-slate-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
               required
             >
               <option value="">Select PUC</option>
@@ -73,7 +73,7 @@ const RunSetupPage: React.FC<RunSetupPageProps> = ({ onRunCreated, runConfig, co
               name="farmName"
               value={formData.farmName}
               onChange={handleChange}
-              className="mt-1 block w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-md shadow-sm text-slate-100 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+              className="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-md shadow-sm text-slate-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
               required
             >
               <option value="">Select Farm</option>
@@ -88,7 +88,7 @@ const RunSetupPage: React.FC<RunSetupPageProps> = ({ onRunCreated, runConfig, co
               name="boord"
               value={formData.boord}
               onChange={handleChange}
-              className="mt-1 block w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-md shadow-sm text-slate-100 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+              className="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-md shadow-sm text-slate-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
               required
             >
                <option value="">Select Boord</option>
@@ -103,7 +103,7 @@ const RunSetupPage: React.FC<RunSetupPageProps> = ({ onRunCreated, runConfig, co
               name="exporter"
               value={formData.exporter}
               onChange={handleChange}
-              className="mt-1 block w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-md shadow-sm text-slate-100 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+              className="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-md shadow-sm text-slate-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
               required
             >
               <option value="">Select Exporter</option>
@@ -118,7 +118,7 @@ const RunSetupPage: React.FC<RunSetupPageProps> = ({ onRunCreated, runConfig, co
               name="commodity"
               value={formData.commodity}
               onChange={handleChange}
-              className="mt-1 block w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-md shadow-sm text-slate-100 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+              className="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-md shadow-sm text-slate-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
               required
             >
               <option value="">Select Commodity</option>
@@ -133,7 +133,7 @@ const RunSetupPage: React.FC<RunSetupPageProps> = ({ onRunCreated, runConfig, co
               name="variety"
               value={formData.variety}
               onChange={handleChange}
-              className="mt-1 block w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-md shadow-sm text-slate-100 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+              className="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-md shadow-sm text-slate-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
               required
             >
               <option value="">Select Variety</option>
