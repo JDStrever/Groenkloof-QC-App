@@ -144,7 +144,7 @@ const CartonEvaluationPage: React.FC<CartonEvaluationPageProps> = ({ run, onSave
   };
 
   const getTotalCount = (counts: CartonEvaluationSample['counts']): number => {
-    return Object.values(counts).reduce((sum: number, current) => {
+    return Object.values(counts).reduce<number>((sum, current) => {
         const val = typeof current === 'number' ? current : 0;
         return sum + val;
     }, 0);

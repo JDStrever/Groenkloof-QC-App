@@ -4,8 +4,8 @@ import { Delivery, ExternalQualityData, DefectsData, InternalQualityData, Intern
 import Card from './ui/Card';
 import Button from './ui/Button';
 import ExternalQualityForm, { QUALITY_CLASSES, CustomDefect, initialInternalQuality, CUSTOM_DEFECT_COUNT } from './forms/ExternalQualityForm';
-import { getSizesForCommodity } from '../../utils/commodityHelper';
-import { DEFECTS } from '../../constants/commoditySizes';
+import { getSizesForCommodity } from '../utils/commodityHelper';
+import { DEFECTS } from '../constants/commoditySizes';
 
 declare var JSZip: any;
 
@@ -91,7 +91,7 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
 
   const generateCsvContent = () => {
     const sizes = getSizesForCommodity(delivery.commodity, commodityData);
-    const sizeHeaders = sizes.map(s => `"${s.code}"`).join(',');
+    const sizeHeaders = sizes.map((s: Size) => `"${s.code}"`).join(',');
     let csvContent = "";
     csvContent += "Delivery QC Report\n";
     csvContent += `"Delivery Note:","${delivery.deliveryNote}"\n`;
@@ -105,7 +105,7 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
     csvContent += "Eksterne kwaliteit\n";
     csvContent += `"Klas / Grootte",${sizeHeaders}\n`;
     QUALITY_CLASSES.forEach(className => {
-        const row = sizes.map(size => qualityData?.[className]?.[size.code] || 0).join(',');
+        const row = sizes.map((size: Size) => qualityData?.[className]?.[size.code] || 0).join(',');
         csvContent += `"${className}",${row}\n`;
     });
     csvContent += "\n";
@@ -120,7 +120,7 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
     });
 
     Object.keys(combinedDefects).forEach(defectName => {
-        const row = sizes.map(size => combinedDefects[defectName]?.[size.code] || 0).join(',');
+        const row = sizes.map((size: Size) => combinedDefects[defectName]?.[size.code] || 0).join(',');
         csvContent += `"${defectName}",${row}\n`;
     });
     csvContent += "\n";
