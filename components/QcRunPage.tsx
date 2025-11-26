@@ -9,19 +9,19 @@ interface QcRunPageProps {
 }
 
 const InfoPill: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-    <div className="bg-slate-100 rounded-lg p-3 text-center">
-        <p className="text-sm font-medium text-slate-500">{label}</p>
-        <p className="text-lg font-semibold text-slate-800">{value}</p>
+    <div className="bg-slate-700 rounded-lg p-3 text-center border border-slate-600">
+        <p className="text-sm font-medium text-slate-400">{label}</p>
+        <p className="text-lg font-semibold text-slate-100">{value}</p>
     </div>
 );
 
 const QCMenuCard: React.FC<{ title: string; onClick: () => void; children: React.ReactNode }> = ({ title, onClick, children }) => (
     <Card 
         onClick={onClick}
-        className="cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out flex flex-col items-center justify-center text-center p-6"
+        className="cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out flex flex-col items-center justify-center text-center p-6 hover:bg-slate-700"
     >
         {children}
-        <h3 className="text-xl font-semibold mt-4 text-slate-800">{title}</h3>
+        <h3 className="text-xl font-semibold mt-4 text-slate-100">{title}</h3>
     </Card>
 );
 
@@ -29,9 +29,9 @@ const QcRunPage: React.FC<QcRunPageProps> = ({ run, onNavigate }) => {
   return (
     <div className="max-w-4xl mx-auto">
         <Card>
-            <div className="border-b border-slate-200 pb-6 mb-6">
-                <h2 className="text-3xl font-bold text-orange-600">QC for Run: {run.runNumber}</h2>
-                <p className="text-slate-500 mt-1">Select a quality control task for this run.</p>
+            <div className="border-b border-slate-700 pb-6 mb-6">
+                <h2 className="text-3xl font-bold text-orange-500">QC for Run: {run.runNumber}</h2>
+                <p className="text-slate-400 mt-1">Select a quality control task for this run.</p>
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">

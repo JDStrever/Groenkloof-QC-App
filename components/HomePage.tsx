@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { View } from '../types';
 import Card from './ui/Card';
@@ -43,52 +44,52 @@ const MrlIcon = () => (
 const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   return (
     <div className="text-center">
-        <h2 className="text-3xl font-bold text-slate-700 mb-4">Welcome</h2>
-        <p className="text-lg text-slate-500 mb-12 max-w-2xl mx-auto">Select an option to begin tracking quality control data for your citrus runs.</p>
+        <h2 className="text-3xl font-bold text-slate-100 mb-4">Welcome</h2>
+        <p className="text-lg text-slate-400 mb-12 max-w-2xl mx-auto">Select an option to begin tracking quality control data for your citrus runs.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <Card
                 onClick={() => onNavigate(View.RUN_SETUP)}
-                className="cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out"
+                className="cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out hover:bg-slate-700"
             >
                 <SetupIcon />
-                <h3 className="text-2xl font-semibold mb-2 text-slate-800">Run Setup</h3>
-                <p className="text-slate-500">Create and configure new production runs before they are packed.</p>
+                <h3 className="text-2xl font-semibold mb-2 text-slate-100">Run Setup</h3>
+                <p className="text-slate-400">Create and configure new production runs before they are packed.</p>
             </Card>
 
             <Card
                 onClick={() => onNavigate(View.QC_LIST)}
-                className="cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out"
+                className="cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out hover:bg-slate-700"
             >
                 <QCIcon />
-                <h3 className="text-2xl font-semibold mb-2 text-slate-800">QC Data Entry</h3>
-                <p className="text-slate-500">Select an active run and enter quality control inspection data.</p>
+                <h3 className="text-2xl font-semibold mb-2 text-slate-100">QC Data Entry</h3>
+                <p className="text-slate-400">Select an active run and enter quality control inspection data.</p>
             </Card>
             
             <Card
                 onClick={() => onNavigate(View.PLAAS_SETUP)}
-                className="cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out"
+                className="cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out hover:bg-slate-700"
             >
                 <FarmIcon />
-                <h3 className="text-2xl font-semibold mb-2 text-slate-800">Plaas Setup</h3>
-                <p className="text-slate-500">Log new fruit deliveries from farms with delivery notes.</p>
+                <h3 className="text-2xl font-semibold mb-2 text-slate-100">Plaas Setup</h3>
+                <p className="text-slate-400">Log new fruit deliveries from farms with delivery notes.</p>
             </Card>
 
             <Card
                 onClick={() => onNavigate(View.ONTVANGS_QC_LIST)}
-                className="cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out"
+                className="cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out hover:bg-slate-700"
             >
                 <DeliveryIcon />
-                <h3 className="text-2xl font-semibold mb-2 text-slate-800">Ontvangs QC</h3>
-                <p className="text-slate-500">Perform quality checks on newly received fruit deliveries.</p>
+                <h3 className="text-2xl font-semibold mb-2 text-slate-100">Ontvangs QC</h3>
+                <p className="text-slate-400">Perform quality checks on newly received fruit deliveries.</p>
             </Card>
 
              <Card
                 onClick={() => onNavigate(View.MRL)}
-                className="cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out md:col-span-2"
+                className="cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out md:col-span-2 hover:bg-slate-700"
             >
                 <MrlIcon />
-                <h3 className="text-2xl font-semibold mb-2 text-slate-800">MRL'e</h3>
-                <p className="text-slate-500">Manage Maximum Residue Limits for different markets.</p>
+                <h3 className="text-2xl font-semibold mb-2 text-slate-100">MRL'e</h3>
+                <p className="text-slate-400">Manage Maximum Residue Limits for different markets.</p>
             </Card>
         </div>
     </div>

@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Run, CartonWeightSample, CommodityData, CartonConfig, Size, BoxType, CartonWeightsEntry, User } from '../../types';
 import Card from '../ui/Card';
@@ -119,36 +120,36 @@ const CartonWeightsPage: React.FC<CartonWeightsPageProps> = ({ run, onSaveCarton
       <form onSubmit={handleSubmit}>
         <Card>
            {isReadOnly && (
-             <div className="p-4 mb-6 text-center bg-yellow-100 border border-yellow-300 text-yellow-800 rounded-lg">
+             <div className="p-4 mb-6 text-center bg-yellow-900 border border-yellow-700 text-yellow-100 rounded-lg">
                 <p className="font-semibold">Read-Only Mode: This form is for viewing or approval.</p>
              </div>
            )}
-          <div className="border-b border-slate-200 pb-4 mb-6">
-            <h2 className="text-3xl font-bold text-slate-800">Karton gewigte</h2>
-            <p className="text-slate-500 mt-1">Carton weights for Run: <span className="font-semibold text-orange-600">{run.runNumber}</span></p>
+          <div className="border-b border-slate-700 pb-4 mb-6">
+            <h2 className="text-3xl font-bold text-slate-100">Karton gewigte</h2>
+            <p className="text-slate-400 mt-1">Carton weights for Run: <span className="font-semibold text-orange-500">{run.runNumber}</span></p>
           </div>
           
           {!isReadOnly && (
-            <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                <h3 className="text-xl font-semibold text-slate-700 mb-4">Add New Weight Sample</h3>
+            <div className="bg-slate-700 p-6 rounded-lg border border-slate-600">
+                <h3 className="text-xl font-semibold text-slate-200 mb-4">Add New Weight Sample</h3>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                 <div className="md:col-span-1">
                     <Label htmlFor="size-select">Size</Label>
-                    <select id="size-select" value={newSampleSize} onChange={e => setNewSampleSize(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-900">
+                    <select id="size-select" value={newSampleSize} onChange={e => setNewSampleSize(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-100">
                     <option value="">Select Size</option>
                     {sizes.map(s => <option key={s.code} value={s.code}>{s.code}</option>)}
                     </select>
                 </div>
                 <div className="md:col-span-1">
                     <Label htmlFor="class-select">Class</Label>
-                    <select id="class-select" value={newSampleClass} onChange={e => setNewSampleClass(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-900">
+                    <select id="class-select" value={newSampleClass} onChange={e => setNewSampleClass(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-100">
                     <option value="">Select Class</option>
                     {classes.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                 </div>
                 <div className="md:col-span-1">
                     <Label htmlFor="box-type-select">Box Type</Label>
-                    <select id="box-type-select" value={newSampleBoxType} onChange={e => setNewSampleBoxType(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-900">
+                    <select id="box-type-select" value={newSampleBoxType} onChange={e => setNewSampleBoxType(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-100">
                     <option value="">Select Box Type</option>
                     {boxTypes.map(bt => <option key={bt.name} value={bt.name}>{bt.name}</option>)}
                     </select>
@@ -172,22 +173,22 @@ const CartonWeightsPage: React.FC<CartonWeightsPageProps> = ({ run, onSaveCarton
             
             return (
               <Card key={sample.id}>
-                <div className="flex justify-between items-start mb-4 border-b border-slate-200 pb-3">
+                <div className="flex justify-between items-start mb-4 border-b border-slate-700 pb-3">
                   <div>
-                    <h3 className="text-xl font-semibold text-slate-700">
-                      Sample: <span className="text-orange-600">{sample.size} / {sample.class} / {sample.boxType}</span>
+                    <h3 className="text-xl font-semibold text-slate-200">
+                      Sample: <span className="text-orange-500">{sample.size} / {sample.class} / {sample.boxType}</span>
                     </h3>
-                    <div className="text-sm text-slate-500 flex items-center space-x-2">
+                    <div className="text-sm text-slate-400 flex items-center space-x-2">
                       <span>Average Weight: {averageWeight(sample.weights)} kg</span>
                        {sampleBoxTypeConfig && (sampleBoxTypeConfig.minWeight || sampleBoxTypeConfig.maxWeight) && (
-                           <span className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">
+                           <span className="text-xs bg-slate-700 px-2 py-0.5 rounded-full border border-slate-600">
                                (Range: {sampleBoxTypeConfig.minWeight || 'N/A'} - {sampleBoxTypeConfig.maxWeight || 'N/A'} kg)
                            </span>
                        )}
                     </div>
                   </div>
                   {!isReadOnly && (
-                    <button type="button" onClick={() => handleDeleteSample(sample.id)} className="text-red-500 hover:text-red-700 p-1 rounded-full transition-colors">
+                    <button type="button" onClick={() => handleDeleteSample(sample.id)} className="text-red-500 hover:text-red-400 p-1 rounded-full transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     </button>
                   )}
@@ -225,7 +226,7 @@ const CartonWeightsPage: React.FC<CartonWeightsPageProps> = ({ run, onSaveCarton
         </div>
 
         {samples.length > 0 && (
-            <div className="mt-10 pt-6 border-t border-slate-200 text-center">
+            <div className="mt-10 pt-6 border-t border-slate-700 text-center">
                 {isReadOnly ? (
                     !isApproved && (
                         <Button type="button" onClick={handleApproveClick} className="w-full max-w-sm bg-green-600 hover:bg-green-700 focus:ring-green-500">

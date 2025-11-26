@@ -157,35 +157,35 @@ const CartonEvaluationPage: React.FC<CartonEvaluationPageProps> = ({ run, onSave
       <form onSubmit={handleSubmit}>
         <Card>
            {isReadOnly && (
-             <div className="p-4 mb-6 text-center bg-yellow-100 border border-yellow-300 text-yellow-800 rounded-lg">
+             <div className="p-4 mb-6 text-center bg-yellow-900 border border-yellow-700 text-yellow-100 rounded-lg">
                 <p className="font-semibold">Read-Only Mode: This form is for viewing or approval.</p>
              </div>
            )}
-          <div className="border-b border-slate-200 pb-4 mb-6">
-            <h2 className="text-3xl font-bold text-slate-800">Karton evaluering</h2>
-            <p className="text-slate-500 mt-1">Carton evaluation for Run: <span className="font-semibold text-orange-600">{run.runNumber}</span></p>
+          <div className="border-b border-slate-700 pb-4 mb-6">
+            <h2 className="text-3xl font-bold text-slate-100">Karton evaluering</h2>
+            <p className="text-slate-400 mt-1">Carton evaluation for Run: <span className="font-semibold text-orange-500">{run.runNumber}</span></p>
           </div>
           {!isReadOnly && (
-            <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                <h3 className="text-xl font-semibold text-slate-700 mb-4">Add New Evaluation Sample</h3>
+            <div className="bg-slate-700 p-6 rounded-lg border border-slate-600">
+                <h3 className="text-xl font-semibold text-slate-200 mb-4">Add New Evaluation Sample</h3>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                 <div>
                     <Label htmlFor="size-select">Size</Label>
-                    <select id="size-select" value={newSampleSize} onChange={e => setNewSampleSize(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-900">
+                    <select id="size-select" value={newSampleSize} onChange={e => setNewSampleSize(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-100">
                     <option value="">Select Size</option>
                     {sizes.map(s => <option key={s.code} value={s.code}>{s.code}</option>)}
                     </select>
                 </div>
                 <div>
                     <Label htmlFor="class-select">Class</Label>
-                    <select id="class-select" value={newSampleClass} onChange={e => setNewSampleClass(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-900">
+                    <select id="class-select" value={newSampleClass} onChange={e => setNewSampleClass(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-100">
                     <option value="">Select Class</option>
                     {classes.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                 </div>
                 <div>
                     <Label htmlFor="box-type-select">Box Type</Label>
-                    <select id="box-type-select" value={newSampleBoxType} onChange={e => setNewSampleBoxType(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-900">
+                    <select id="box-type-select" value={newSampleBoxType} onChange={e => setNewSampleBoxType(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-100">
                     <option value="">Select Box Type</option>
                     {boxTypes.map(bt => <option key={bt.name} value={bt.name}>{bt.name}</option>)}
                     </select>
@@ -209,12 +209,12 @@ const CartonEvaluationPage: React.FC<CartonEvaluationPageProps> = ({ run, onSave
               const sampleSize = Number(sample.sampleSize) || 0;
               return (
                 <Card key={sample.id}>
-                  <div className="flex justify-between items-start mb-4 border-b border-slate-200 pb-3">
-                    <h3 className="text-xl font-semibold text-slate-700">
-                      Sample: <span className="text-indigo-600">{sample.size} / {sample.class} / {sample.boxType}</span>
+                  <div className="flex justify-between items-start mb-4 border-b border-slate-700 pb-3">
+                    <h3 className="text-xl font-semibold text-slate-200">
+                      Sample: <span className="text-indigo-400">{sample.size} / {sample.class} / {sample.boxType}</span>
                     </h3>
                     {!isReadOnly && (
-                        <button type="button" onClick={() => handleDeleteSample(sample.id)} className="text-red-500 hover:text-red-700 p-1 rounded-full transition-colors">
+                        <button type="button" onClick={() => handleDeleteSample(sample.id)} className="text-red-500 hover:text-red-400 p-1 rounded-full transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                         </button>
                     )}
@@ -237,25 +237,25 @@ const CartonEvaluationPage: React.FC<CartonEvaluationPageProps> = ({ run, onSave
                         </div>
                       );
                     })}
-                    <div className="bg-slate-100 p-3 rounded-lg text-center h-full flex flex-col justify-center">
-                      <p className="text-sm font-medium text-slate-500">Total Vrugte</p>
-                      <p className="text-lg font-bold text-slate-700">{totalCount}</p>
+                    <div className="bg-slate-700 p-3 rounded-lg text-center h-full flex flex-col justify-center border border-slate-600">
+                      <p className="text-sm font-medium text-slate-400">Total Vrugte</p>
+                      <p className="text-lg font-bold text-slate-200">{totalCount}</p>
                     </div>
                   </div>
-                  <div className="mt-8 pt-6 border-t border-slate-200">
-                    <h4 className="text-lg font-semibold text-slate-700 mb-4">Defekte gekry per klas</h4>
+                  <div className="mt-8 pt-6 border-t border-slate-700">
+                    <h4 className="text-lg font-semibold text-slate-200 mb-4">Defekte gekry per klas</h4>
                     <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-slate-200 border border-slate-200 rounded-lg">
-                        <thead className="bg-slate-50">
+                      <table className="min-w-full divide-y divide-slate-600 border border-slate-600 rounded-lg">
+                        <thead className="bg-slate-700">
                           <tr>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Defek</th>
-                            <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider">Klas 1</th>
-                            <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider">Klas 2</th>
-                            <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider">Klas 3</th>
-                            <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider">Totaal (% van monster)</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Defek</th>
+                            <th className="px-4 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Klas 1</th>
+                            <th className="px-4 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Klas 2</th>
+                            <th className="px-4 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Klas 3</th>
+                            <th className="px-4 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Totaal (% van monster)</th>
                           </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-slate-200">
+                        <tbody className="bg-slate-800 divide-y divide-slate-600">
                           {DEFECTS.map(defectName => {
                             const klas1 = Number(sample.defects?.[defectName]?.klas1 || 0);
                             const klas2 = Number(sample.defects?.[defectName]?.klas2 || 0);
@@ -264,12 +264,12 @@ const CartonEvaluationPage: React.FC<CartonEvaluationPageProps> = ({ run, onSave
                             const percentage = sampleSize > 0 ? (defectTotal / sampleSize) * 100 : 0;
                             return (
                               <tr key={defectName}>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-slate-800">{defectName}</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-slate-200">{defectName}</td>
                                 <td className="px-2 py-1"><Input type="number" min="0" className="w-24 mx-auto text-center" placeholder="0" value={sample.defects?.[defectName]?.klas1 || ''} onChange={e => handleDefectChange(sample.id, defectName, 'klas1', e.target.value)} disabled={isReadOnly} /></td>
                                 <td className="px-2 py-1"><Input type="number" min="0" className="w-24 mx-auto text-center" placeholder="0" value={sample.defects?.[defectName]?.klas2 || ''} onChange={e => handleDefectChange(sample.id, defectName, 'klas2', e.target.value)} disabled={isReadOnly} /></td>
                                 <td className="px-2 py-1"><Input type="number" min="0" className="w-24 mx-auto text-center" placeholder="0" value={sample.defects?.[defectName]?.klas3 || ''} onChange={e => handleDefectChange(sample.id, defectName, 'klas3', e.target.value)} disabled={isReadOnly} /></td>
                                 <td className="px-2 py-1 text-center align-middle text-sm">
-                                  {defectTotal > 0 ? <span className="font-medium">{defectTotal} <span className="text-slate-500">({percentage.toFixed(1)}%)</span></span> : <span className="text-slate-400">0</span>}
+                                  {defectTotal > 0 ? <span className="font-medium text-slate-200">{defectTotal} <span className="text-slate-500">({percentage.toFixed(1)}%)</span></span> : <span className="text-slate-600">0</span>}
                                 </td>
                               </tr>
                             );
@@ -287,7 +287,7 @@ const CartonEvaluationPage: React.FC<CartonEvaluationPageProps> = ({ run, onSave
                                  <td className="px-2 py-1"><Input type="number" min="0" className="w-24 mx-auto text-center" placeholder="0" value={defect.counts.klas2} onChange={e => handleCustomDefectChange(sample.id, index, 'klas2', e.target.value)} disabled={!defect.name || isReadOnly} /></td>
                                  <td className="px-2 py-1"><Input type="number" min="0" className="w-24 mx-auto text-center" placeholder="0" value={defect.counts.klas3} onChange={e => handleCustomDefectChange(sample.id, index, 'klas3', e.target.value)} disabled={!defect.name || isReadOnly} /></td>
                                  <td className="px-2 py-1 text-center align-middle text-sm">
-                                    {defectTotal > 0 ? <span className="font-medium">{defectTotal} <span className="text-slate-500">({percentage.toFixed(1)}%)</span></span> : <span className="text-slate-400">0</span>}
+                                    {defectTotal > 0 ? <span className="font-medium text-slate-200">{defectTotal} <span className="text-slate-500">({percentage.toFixed(1)}%)</span></span> : <span className="text-slate-600">0</span>}
                                  </td>
                                </tr>
                              );
@@ -303,7 +303,7 @@ const CartonEvaluationPage: React.FC<CartonEvaluationPageProps> = ({ run, onSave
         </div>
 
         {samples.length > 0 && (
-          <div className="mt-10 pt-6 border-t border-slate-200 text-center">
+          <div className="mt-10 pt-6 border-t border-slate-700 text-center">
              {isReadOnly ? (
                 !isApproved && (
                     <Button type="button" onClick={handleApproveClick} className="w-full max-w-sm bg-green-600 hover:bg-green-700 focus:ring-green-500">

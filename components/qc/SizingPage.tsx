@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Run, SizingData, CommodityData, Size, SizingEntry, User } from '../../types';
 import Card from '../ui/Card';
@@ -78,8 +79,8 @@ const SizingPage: React.FC<SizingPageProps> = ({ run, onSaveSizing, commodityDat
     return (
         <Card>
             <div className="text-center p-8">
-                <h3 className="text-xl font-semibold text-slate-700">Unsupported Commodity</h3>
-                <p className="mt-2 text-slate-500">
+                <h3 className="text-xl font-semibold text-slate-300">Unsupported Commodity</h3>
+                <p className="mt-2 text-slate-400">
                     No size information is available for "{run.commodity}". Please add it in the admin panel.
                 </p>
             </div>
@@ -94,21 +95,21 @@ const SizingPage: React.FC<SizingPageProps> = ({ run, onSaveSizing, commodityDat
       <form onSubmit={handleSubmit}>
         <Card>
            {isReadOnly && (
-             <div className="p-4 mb-6 text-center bg-yellow-100 border border-yellow-300 text-yellow-800 rounded-lg">
+             <div className="p-4 mb-6 text-center bg-yellow-900 border border-yellow-700 text-yellow-100 rounded-lg">
                 <p className="font-semibold">Read-Only Mode: This form is for viewing or approval.</p>
              </div>
            )}
-          <div className="border-b border-slate-200 pb-4 mb-6">
-            <h2 className="text-3xl font-bold text-slate-800">Sizing</h2>
-            <p className="text-slate-500 mt-1">
-              {isReadOnly ? 'Viewing' : 'Enter'} 10 fruit measurements (in mm) for each size in Run: <span className="font-semibold text-orange-600">{run.runNumber}</span>
+          <div className="border-b border-slate-700 pb-4 mb-6">
+            <h2 className="text-3xl font-bold text-slate-100">Sizing</h2>
+            <p className="text-slate-400 mt-1">
+              {isReadOnly ? 'Viewing' : 'Enter'} 10 fruit measurements (in mm) for each size in Run: <span className="font-semibold text-orange-500">{run.runNumber}</span>
             </p>
           </div>
           
           <div className="space-y-10">
             {sizes.map(size => (
               <div key={size.code}>
-                <h3 className="text-2xl font-semibold text-slate-700 border-b-2 border-orange-500 pb-2 mb-6">
+                <h3 className="text-2xl font-semibold text-slate-200 border-b-2 border-orange-500 pb-2 mb-6">
                   Size: {size.code}
                   <span className="text-base font-normal text-slate-500 ml-3">({size.diameterRange})</span>
                 </h3>
@@ -145,7 +146,7 @@ const SizingPage: React.FC<SizingPageProps> = ({ run, onSaveSizing, commodityDat
             ))}
           </div>
 
-          <div className="mt-10 pt-6 border-t border-slate-200 text-center">
+          <div className="mt-10 pt-6 border-t border-slate-700 text-center">
              {isReadOnly ? (
                  !isApproved && (
                     <Button type="button" onClick={handleApproveClick} className="w-full max-w-sm bg-green-600 hover:bg-green-700 focus:ring-green-500">

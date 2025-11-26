@@ -16,9 +16,9 @@ interface OntvangsQcPageProps {
 }
 
 const InfoPill: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-    <div className="bg-slate-100 rounded-lg p-3 text-center">
-        <p className="text-sm font-medium text-slate-500">{label}</p>
-        <p className="text-lg font-semibold text-slate-800">{value}</p>
+    <div className="bg-slate-700 rounded-lg p-3 text-center border border-slate-600">
+        <p className="text-sm font-medium text-slate-400">{label}</p>
+        <p className="text-lg font-semibold text-slate-100">{value}</p>
     </div>
 );
 
@@ -187,10 +187,10 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
   return (
     <div className="max-w-7xl mx-auto space-y-8">
         <Card>
-            <div className="flex flex-wrap justify-between items-start border-b border-slate-200 pb-6 mb-6 gap-4">
+            <div className="flex flex-wrap justify-between items-start border-b border-slate-700 pb-6 mb-6 gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold text-purple-600">Ontvangs QC for: {delivery.deliveryNote}</h2>
-                    <p className="text-slate-500 mt-1">Details for the selected delivery are shown below.</p>
+                    <h2 className="text-3xl font-bold text-purple-500">Ontvangs QC for: {delivery.deliveryNote}</h2>
+                    <p className="text-slate-400 mt-1">Details for the selected delivery are shown below.</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                     <Button onClick={handleExportPackage} disabled={loading} className="bg-green-600 hover:bg-green-700 focus:ring-green-500 flex items-center space-x-2">

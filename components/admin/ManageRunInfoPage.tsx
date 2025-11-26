@@ -53,10 +53,10 @@ const ManageRunInfoPage: React.FC<ManageRunInfoPageProps> = ({ runConfig, onUpda
 
   return (
     <Card>
-      <div className="border-b border-slate-200 pb-4 mb-6">
-        <h2 className="text-3xl font-bold text-slate-800">Manage Run Info</h2>
-        <p className="text-slate-500 mt-1">Manage dropdown options for Run Setup.</p>
-        <div className="mt-2 p-2 bg-blue-50 text-blue-700 rounded text-sm">
+      <div className="border-b border-slate-700 pb-4 mb-6">
+        <h2 className="text-3xl font-bold text-slate-100">Manage Run Info</h2>
+        <p className="text-slate-400 mt-1">Manage dropdown options for Run Setup.</p>
+        <div className="mt-2 p-2 bg-blue-900 text-blue-100 border border-blue-700 rounded text-sm">
             <strong>Note:</strong> Commodities are managed in the <span className="font-semibold">Manage Commodities</span> page to ensure they are linked to size data.
         </div>
       </div>
@@ -71,8 +71,8 @@ const ManageRunInfoPage: React.FC<ManageRunInfoPageProps> = ({ runConfig, onUpda
               onClick={() => { setActiveTab(tab.key); setNewItem(''); }}
               className={`px-4 py-2 rounded-lg text-left transition-colors whitespace-nowrap ${
                 activeTab === tab.key
-                  ? 'bg-orange-500 text-white font-semibold'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  ? 'bg-orange-600 text-white font-semibold'
+                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
               }`}
             >
               {tab.label}
@@ -82,7 +82,7 @@ const ManageRunInfoPage: React.FC<ManageRunInfoPageProps> = ({ runConfig, onUpda
 
         {/* Content */}
         <div className="md:w-3/4">
-          <h3 className="text-xl font-semibold text-slate-700 mb-4">
+          <h3 className="text-xl font-semibold text-slate-200 mb-4">
             Manage {tabs.find(t => t.key === activeTab)?.label}
           </h3>
 
@@ -97,16 +97,16 @@ const ManageRunInfoPage: React.FC<ManageRunInfoPageProps> = ({ runConfig, onUpda
             <Button type="submit">Add</Button>
           </form>
 
-          <div className="bg-slate-50 rounded-lg border border-slate-200 p-4 max-h-[500px] overflow-y-auto">
+          <div className="bg-slate-700/50 rounded-lg border border-slate-700 p-4 max-h-[500px] overflow-y-auto">
             {(runConfig[activeTab] && runConfig[activeTab].length > 0) ? (
               <ul className="space-y-2">
                 {runConfig[activeTab].map((item) => (
-                  <li key={item} className="flex justify-between items-center bg-white p-3 rounded shadow-sm">
-                    <span className="text-slate-800">{item}</span>
+                  <li key={item} className="flex justify-between items-center bg-slate-800 p-3 rounded shadow-sm border border-slate-700">
+                    <span className="text-slate-200">{item}</span>
                     <button
                       type="button"
                       onClick={() => handleDeleteItem(item)}
-                      className="text-red-500 hover:text-red-700 font-medium text-sm"
+                      className="text-red-400 hover:text-red-300 font-medium text-sm"
                     >
                       Remove
                     </button>

@@ -143,8 +143,8 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
         return (
             <Card>
                 <div className="text-center p-8">
-                    <h3 className="text-xl font-semibold text-slate-700">Unsupported Commodity</h3>
-                    <p className="mt-2 text-slate-500">
+                    <h3 className="text-xl font-semibold text-slate-300">Unsupported Commodity</h3>
+                    <p className="mt-2 text-slate-400">
                         No size information is available for "{delivery.commodity}". Please add it in the admin panel.
                     </p>
                 </div>
@@ -155,25 +155,25 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
     return (
         <form onSubmit={handleSubmit}>
             <Card>
-                <h3 className="text-2xl font-bold text-slate-800 mb-1">Eksterne kwaliteit</h3>
-                 <p className="text-slate-500 mb-6">Voer die aantal vrugte vir elke grootte en klas in (Teiken: {SAMPLE_TARGET} vrugte).</p>
+                <h3 className="text-2xl font-bold text-slate-100 mb-1">Eksterne kwaliteit</h3>
+                 <p className="text-slate-400 mb-6">Voer die aantal vrugte vir elke grootte en klas in (Teiken: {SAMPLE_TARGET} vrugte).</p>
                 <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-slate-200 border border-slate-200 rounded-lg">
-                        <thead className="bg-slate-50">
+                    <table className="min-w-full divide-y divide-slate-600 border border-slate-600 rounded-lg">
+                        <thead className="bg-slate-700">
                             <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Klas / Grootte</th>
-                                {sizes.map(size => <th key={size.code} className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider">{size.code}</th>)}
+                                <th className="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Klas / Grootte</th>
+                                {sizes.map(size => <th key={size.code} className="px-4 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">{size.code}</th>)}
                             </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-slate-200">
+                        <tbody className="bg-slate-800 divide-y divide-slate-600">
                             {QUALITY_CLASSES.map(className => (
                                 <tr key={className}>
-                                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-slate-800">{className}</td>
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-slate-100">{className}</td>
                                     {sizes.map(size => {
                                         const countValue = Number(qualityData[className]?.[size.code]) || 0;
                                         const percentageText = totalFruitCount > 0 ? ((countValue / totalFruitCount) * 100).toFixed(1) : '0.0';
                                         return (
-                                            <td key={size.code} className="px-2 py-2 whitespace-nowrap text-sm text-slate-500">
+                                            <td key={size.code} className="px-2 py-2 whitespace-nowrap text-sm text-slate-400">
                                                 <div className="flex items-center space-x-2">
                                                     <Input 
                                                         type="number" 
@@ -183,7 +183,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                                                         className="w-20 text-center"
                                                         placeholder="0"
                                                     />
-                                                    <span className="text-xs text-slate-400 w-10 text-right">
+                                                    <span className="text-xs text-slate-500 w-10 text-right">
                                                         ({percentageText}%)
                                                     </span>
                                                 </div>
@@ -193,10 +193,10 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                                 </tr>
                             ))}
                         </tbody>
-                        <tfoot className="bg-slate-100">
+                        <tfoot className="bg-slate-700">
                             <tr>
                                 <td colSpan={sizes.length + 1} className="px-4 py-3 text-right">
-                                    <p className={`text-lg font-bold ${totalFruitCount === SAMPLE_TARGET ? 'text-green-600' : 'text-slate-700'}`}>
+                                    <p className={`text-lg font-bold ${totalFruitCount === SAMPLE_TARGET ? 'text-green-500' : 'text-slate-200'}`}>
                                         Totaal: {totalFruitCount} / {SAMPLE_TARGET}
                                     </p>
                                 </td>
@@ -208,22 +208,22 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
             
             <div className="mt-8">
                 <Card>
-                    <h3 className="text-2xl font-bold text-slate-800 mb-1">Defekte gekry</h3>
-                    <p className="text-slate-500 mb-6">Voer die aantal vrugte per defek en grootte in.</p>
+                    <h3 className="text-2xl font-bold text-slate-100 mb-1">Defekte gekry</h3>
+                    <p className="text-slate-400 mb-6">Voer die aantal vrugte per defek en grootte in.</p>
                     <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-slate-200 border border-slate-200 rounded-lg">
-                            <thead className="bg-slate-50">
+                        <table className="min-w-full divide-y divide-slate-600 border border-slate-600 rounded-lg">
+                            <thead className="bg-slate-700">
                                 <tr>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Defek / Grootte</th>
-                                    {sizes.map(size => <th key={size.code} className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider">{size.code}</th>)}
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Defek / Grootte</th>
+                                    {sizes.map(size => <th key={size.code} className="px-4 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">{size.code}</th>)}
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-slate-200">
+                            <tbody className="bg-slate-800 divide-y divide-slate-600">
                                 {DEFECTS.map(defectName => (
                                     <tr key={defectName}>
-                                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-slate-800">{defectName}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-slate-100">{defectName}</td>
                                         {sizes.map(size => (
-                                            <td key={size.code} className="px-2 py-2 whitespace-nowrap text-sm text-slate-500">
+                                            <td key={size.code} className="px-2 py-2 whitespace-nowrap text-sm text-slate-400">
                                                 <Input 
                                                     type="number"
                                                     min="0"
@@ -238,7 +238,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                                 ))}
                                 {customDefects.map((defect, index) => (
                                     <tr key={`custom-${index}`}>
-                                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-slate-800">
+                                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-slate-100">
                                             <Input 
                                                 type="text"
                                                 value={defect.name}
@@ -248,7 +248,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                                             />
                                         </td>
                                         {sizes.map(size => (
-                                            <td key={size.code} className="px-2 py-2 whitespace-nowrap text-sm text-slate-500">
+                                            <td key={size.code} className="px-2 py-2 whitespace-nowrap text-sm text-slate-400">
                                                 <Input 
                                                     type="number"
                                                     min="0"
@@ -270,8 +270,8 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
 
             <div className="mt-8">
                 <Card>
-                    <h3 className="text-2xl font-bold text-slate-800 mb-1">Interne Kwaliteit</h3>
-                    <p className="text-slate-500 mb-6">Voer die interne kwaliteit toetsresultate vir die monster in.</p>
+                    <h3 className="text-2xl font-bold text-slate-100 mb-1">Interne Kwaliteit</h3>
+                    <p className="text-slate-400 mb-6">Voer die interne kwaliteit toetsresultate vir die monster in.</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div>
                             <Label htmlFor="totalMass">Total mass (g)</Label>
@@ -287,7 +287,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                         </div>
                         <div>
                             <Label htmlFor="juicePercentage">Juice %</Label>
-                            <Input id="juicePercentage" name="juicePercentage" type="number" value={internalQualityData.juicePercentage} readOnly placeholder="0.0" className="bg-slate-100 cursor-not-allowed text-black" />
+                            <Input id="juicePercentage" name="juicePercentage" type="number" value={internalQualityData.juicePercentage} readOnly placeholder="0.0" className="bg-slate-800 cursor-not-allowed text-slate-400" />
                         </div>
                         <div>
                             <Label htmlFor="brix">Brix</Label>
@@ -299,11 +299,11 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                         </div>
                         <div>
                             <Label htmlFor="acid">Acid</Label>
-                            <Input id="acid" name="acid" type="number" value={internalQualityData.acid} readOnly placeholder="0.00" className="bg-slate-100 cursor-not-allowed text-black" />
+                            <Input id="acid" name="acid" type="number" value={internalQualityData.acid} readOnly placeholder="0.00" className="bg-slate-800 cursor-not-allowed text-slate-400" />
                         </div>
                         <div>
                             <Label htmlFor="relation">Relation</Label>
-                            <Input id="relation" name="relation" type="number" value={internalQualityData.relation} readOnly placeholder="0.0" className="bg-slate-100 cursor-not-allowed text-black" />
+                            <Input id="relation" name="relation" type="number" value={internalQualityData.relation} readOnly placeholder="0.0" className="bg-slate-800 cursor-not-allowed text-slate-400" />
                         </div>
                         <div>
                             <Label htmlFor="seeds">Seeds</Label>
@@ -317,8 +317,8 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                 <Card>
                     <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
                         <div>
-                            <h3 className="text-2xl font-bold text-slate-800 mb-1">Foto's</h3>
-                            <p className="text-slate-500">Add photos for the inspection record.</p>
+                            <h3 className="text-2xl font-bold text-slate-100 mb-1">Foto's</h3>
+                            <p className="text-slate-400">Add photos for the inspection record.</p>
                         </div>
                     </div>
                     
@@ -350,7 +350,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                         <button 
                             type="button"
                             onClick={handleAddPhotoClick}
-                            className="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-lg text-slate-500 hover:bg-slate-50 hover:border-orange-400 hover:text-orange-500 transition-colors aspect-square"
+                            className="flex flex-col items-center justify-center border-2 border-dashed border-slate-600 rounded-lg text-slate-400 hover:bg-slate-700 hover:border-orange-500 hover:text-orange-500 transition-colors aspect-square"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2-2V9z" />

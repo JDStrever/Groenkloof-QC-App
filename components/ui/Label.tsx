@@ -8,7 +8,7 @@ interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
 const Label: React.FC<LabelProps> = ({ children, ...props }) => {
   return (
     <label
-      className="block text-sm font-medium text-slate-700"
+      className="block text-sm font-medium text-slate-300"
       {...props}
     >
       {children}
@@ -17,4 +17,3 @@ const Label: React.FC<LabelProps> = ({ children, ...props }) => {
 };
 
 export default Label;
-   
