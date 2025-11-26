@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { Delivery, ExternalQualityData, DefectsData, InternalQualityData, Size, CommodityData } from '../../types';
 import { DEFECTS } from '../../constants/commoditySizes';
@@ -51,7 +52,6 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
 
     const handleQualityChange = (className: string, sizeCode: string, value: string) => {
         const numValue = value === '' ? '' : parseInt(value, 10);
-        // FIX: Replaced unsafe `as number` cast with a type guard to safely check for NaN.
         if (typeof numValue === 'number' && isNaN(numValue)) return;
 
         setQualityData(prev => ({
@@ -65,7 +65,6 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
     
     const handleDefectChange = (defectName: string, sizeCode: string, value: string) => {
         const numValue = value === '' ? '' : parseInt(value, 10);
-        // FIX: Replaced unsafe `as number` cast with a type guard to safely check for NaN.
         if (typeof numValue === 'number' && isNaN(numValue)) return;
 
         setDefectsData(prev => ({
@@ -85,7 +84,6 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
             defectToUpdate.name = value;
         } else { // It's a size code
             const numValue = value === '' ? '' : parseInt(value, 10);
-            // FIX: Replaced unsafe `as number` cast with a type guard to safely check for NaN.
             if (typeof numValue === 'number' && isNaN(numValue)) return;
             defectToUpdate.counts = { ...defectToUpdate.counts, [field]: numValue };
         }
@@ -96,7 +94,6 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
 
     const handleInternalQualityChange = (field: keyof InternalQualityData, value: string) => {
         const numValue = value === '' ? '' : parseFloat(value);
-        // FIX: Replaced unsafe `as number` cast with a type guard to safely check for NaN.
         if (typeof numValue === 'number' && isNaN(numValue)) return;
 
         setInternalQualityData(prev => ({
@@ -108,9 +105,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
     const totalFruitCount = useMemo(() => {
         return Object.values(qualityData)
             .flatMap(sizeCounts => Object.values(sizeCounts))
-            // FIX: Removed explicit type annotation from `reduce` accumulator to prevent potential type inference issues.
-            // FIX: Explicitly typed the `total` accumulator as a number to prevent incorrect type inference which could lead to string concatenation.
-            .reduce((total, count) => total + (Number(count) || 0), 0);
+            .reduce<number>((total, count) => total + (Number(count) || 0), 0);
     }, [qualityData]);
     
     const handleSubmit = (e: React.FormEvent) => {
@@ -130,8 +125,9 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
             const file = files[i];
             const reader = new FileReader();
             reader.onload = (loadEvent) => {
-                if (loadEvent.target?.result) {
-                    setPhotos(prevPhotos => [...prevPhotos, loadEvent.target.result as string]);
+                const target = loadEvent.target;
+                if (target && target.result) {
+                    setPhotos(prevPhotos => [...prevPhotos, target.result as string]);
                 }
             };
             reader.readAsDataURL(file);
@@ -174,9 +170,8 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                                 <tr key={className}>
                                     <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-slate-800">{className}</td>
                                     {sizes.map(size => {
-// Bug fix: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type. Also Operator '>' cannot be applied to types 'string | number' and 'number'.
-// By ensuring totalFruitCount is always a number, this calculation is now safe.
-                                        const percentageText = totalFruitCount > 0 ? (((Number(qualityData[className]?.[size.code]) || 0) / totalFruitCount) * 100).toFixed(1) : '0.0';
+                                        const countValue = Number(qualityData[className]?.[size.code]) || 0;
+                                        const percentageText = totalFruitCount > 0 ? ((countValue / totalFruitCount) * 100).toFixed(1) : '0.0';
                                         return (
                                             <td key={size.code} className="px-2 py-2 whitespace-nowrap text-sm text-slate-500">
                                                 <div className="flex items-center space-x-2">
