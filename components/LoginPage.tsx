@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Card from './ui/Card';
 import Input from './ui/Input';
@@ -23,8 +24,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     <div className="max-w-md mx-auto mt-16">
       <Card>
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-slate-800">Login</h2>
-          <p className="text-slate-500 mt-2">Please sign in to access the Groenkloof QC App.</p>
+          <h2 className="text-3xl font-bold text-green-400">Login</h2>
+          <p className="text-slate-400 mt-2">Please sign in to access the Groenkloof QC App.</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>

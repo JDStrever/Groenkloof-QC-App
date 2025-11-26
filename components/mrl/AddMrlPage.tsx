@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { MrlRecord, MrlResidues, CustomMrlResidue } from '../../types';
 import Card from '../ui/Card';
@@ -100,8 +101,8 @@ const AddMrlPage: React.FC<AddMrlPageProps> = ({ onRecordCreated }) => {
     <div className="max-w-4xl mx-auto">
       <Card>
         <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-slate-800">Add New MRL Record</h2>
-            <p className="text-slate-500 mt-2">Enter the details from the lab analysis report.</p>
+            <h2 className="text-3xl font-bold text-green-400">Add New MRL Record</h2>
+            <p className="text-slate-400 mt-2">Enter the details from the lab analysis report.</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -115,8 +116,8 @@ const AddMrlPage: React.FC<AddMrlPageProps> = ({ onRecordCreated }) => {
             <InputGroup name="variety" label="Variety" value={formData.variety} onChange={handleChange} />
           </div>
 
-          <div className="pt-6 border-t">
-            <h3 className="text-xl font-semibold text-slate-700 mb-4">Components Detected (Residue [mg/kg])</h3>
+          <div className="pt-6 border-t border-slate-700">
+            <h3 className="text-xl font-semibold text-green-400 mb-4">Components Detected (Residue [mg/kg])</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <ResidueInput name="d24" label="2,4D" value={residues.d24} onChange={handleResidueChange} />
               <ResidueInput name="imazalil" label="Imazalil" value={residues.imazalil} onChange={handleResidueChange} />
@@ -125,8 +126,8 @@ const AddMrlPage: React.FC<AddMrlPageProps> = ({ onRecordCreated }) => {
             </div>
           </div>
 
-           <div className="pt-6 border-t">
-            <h3 className="text-xl font-semibold text-slate-700 mb-4">Other Components Detected (Residue [mg/kg])</h3>
+           <div className="pt-6 border-t border-slate-700">
+            <h3 className="text-xl font-semibold text-green-400 mb-4">Other Components Detected (Residue [mg/kg])</h3>
             <div className="space-y-4">
                 {customResidues.map((custom, index) => (
                     <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
@@ -150,14 +151,14 @@ const AddMrlPage: React.FC<AddMrlPageProps> = ({ onRecordCreated }) => {
           </div>
 
 
-          <div className="pt-6 border-t">
-              <h3 className="text-xl font-semibold text-slate-700 mb-4">Lab Report</h3>
+          <div className="pt-6 border-t border-slate-700">
+              <h3 className="text-xl font-semibold text-green-400 mb-4">Lab Report</h3>
               <input type="file" accept="application/pdf" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
               <div className="flex items-center gap-4">
                   <Button type="button" onClick={() => fileInputRef.current?.click()} className="bg-slate-600 hover:bg-slate-700">
                       Upload PDF
                   </Button>
-                  {pdfFileName && <span className="text-slate-600 text-sm">{pdfFileName}</span>}
+                  {pdfFileName && <span className="text-slate-400 text-sm">{pdfFileName}</span>}
               </div>
           </div>
           

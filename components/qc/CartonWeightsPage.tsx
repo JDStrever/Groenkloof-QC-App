@@ -125,13 +125,13 @@ const CartonWeightsPage: React.FC<CartonWeightsPageProps> = ({ run, onSaveCarton
              </div>
            )}
           <div className="border-b border-slate-700 pb-4 mb-6">
-            <h2 className="text-3xl font-bold text-slate-100">Karton gewigte</h2>
+            <h2 className="text-3xl font-bold text-green-400">Karton gewigte</h2>
             <p className="text-slate-400 mt-1">Carton weights for Run: <span className="font-semibold text-orange-500">{run.runNumber}</span></p>
           </div>
           
           {!isReadOnly && (
             <div className="bg-slate-700 p-6 rounded-lg border border-slate-600">
-                <h3 className="text-xl font-semibold text-slate-200 mb-4">Add New Weight Sample</h3>
+                <h3 className="text-xl font-semibold text-green-400 mb-4">Add New Weight Sample</h3>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                 <div className="md:col-span-1">
                     <Label htmlFor="size-select">Size</Label>

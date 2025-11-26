@@ -14,7 +14,7 @@ const OntvangsQcListPage: React.FC<OntvangsQcListPageProps> = ({ deliveries, onS
   return (
     <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-slate-100">Select a Delivery</h2>
+            <h2 className="text-3xl font-bold text-green-400">Select a Delivery</h2>
             <p className="text-slate-400 mt-2">Choose a delivery from the list below to enter QC data.</p>
         </div>
       {deliveries.length > 0 ? (

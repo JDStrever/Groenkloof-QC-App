@@ -23,16 +23,16 @@ const ListIcon = () => (
 const MrlPage: React.FC<MrlPageProps> = ({ onNavigate }) => {
   return (
     <div className="text-center">
-        <h2 className="text-3xl font-bold text-slate-700 mb-4">MRL Management</h2>
-        <p className="text-lg text-slate-500 mb-12 max-w-2xl mx-auto">Add new MRL records or view existing ones.</p>
+        <h2 className="text-3xl font-bold text-green-400 mb-4">MRL Management</h2>
+        <p className="text-lg text-slate-400 mb-12 max-w-2xl mx-auto">Add new MRL records or view existing ones.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <Card
                 onClick={() => onNavigate(View.MRL_ADD)}
                 className="cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out"
             >
                 <AddIcon />
-                <h3 className="text-2xl font-semibold mb-2 text-slate-800">Add MRL</h3>
-                <p className="text-slate-500">Create a new MRL record with lab results.</p>
+                <h3 className="text-2xl font-semibold mb-2 text-slate-100">Add MRL</h3>
+                <p className="text-slate-400">Create a new MRL record with lab results.</p>
             </Card>
 
             <Card
@@ -40,8 +40,8 @@ const MrlPage: React.FC<MrlPageProps> = ({ onNavigate }) => {
                 className="cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out"
             >
                 <ListIcon />
-                <h3 className="text-2xl font-semibold mb-2 text-slate-800">MRL Records</h3>
-                <p className="text-slate-500">View, manage, and export existing MRL records.</p>
+                <h3 className="text-2xl font-semibold mb-2 text-slate-100">MRL Records</h3>
+                <p className="text-slate-400">View, manage, and export existing MRL records.</p>
             </Card>
         </div>
     </div>

@@ -100,7 +100,7 @@ const SizingPage: React.FC<SizingPageProps> = ({ run, onSaveSizing, commodityDat
              </div>
            )}
           <div className="border-b border-slate-700 pb-4 mb-6">
-            <h2 className="text-3xl font-bold text-slate-100">Sizing</h2>
+            <h2 className="text-3xl font-bold text-green-400">Sizing</h2>
             <p className="text-slate-400 mt-1">
               {isReadOnly ? 'Viewing' : 'Enter'} 10 fruit measurements (in mm) for each size in Run: <span className="font-semibold text-orange-500">{run.runNumber}</span>
             </p>
@@ -109,9 +109,9 @@ const SizingPage: React.FC<SizingPageProps> = ({ run, onSaveSizing, commodityDat
           <div className="space-y-10">
             {sizes.map(size => (
               <div key={size.code}>
-                <h3 className="text-2xl font-semibold text-slate-200 border-b-2 border-orange-500 pb-2 mb-6">
+                <h3 className="text-2xl font-semibold text-green-400 border-b-2 border-orange-500 pb-2 mb-6">
                   Size: {size.code}
-                  <span className="text-base font-normal text-slate-500 ml-3">({size.diameterRange})</span>
+                  <span className="text-base font-normal text-slate-400 ml-3">({size.diameterRange})</span>
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-x-6 gap-y-4">
                   {Array(10).fill(0).map((_, index) => {

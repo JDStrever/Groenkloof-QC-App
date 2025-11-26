@@ -14,7 +14,7 @@ const QcListPage: React.FC<QcListPageProps> = ({ runs, onSelectRun, onSetupNewRu
   return (
     <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-slate-100">Select a Run</h2>
+            <h2 className="text-3xl font-bold text-green-400">Select a Run</h2>
             <p className="text-slate-400 mt-2">Choose a run from the list below to enter QC data.</p>
         </div>
       {runs.length > 0 ? (

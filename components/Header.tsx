@@ -12,7 +12,7 @@ interface HeaderProps {
 }
 
 const CitrusIcon: React.FC = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-orange-500" viewBox="0 0 20 20" fill="currentColor">
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-400" viewBox="0 0 20 20" fill="currentColor">
         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM6.636 6.636a.5.5 0 01.707 0L10 9.293l2.657-2.657a.5.5 0 01.707.707L10.707 10l2.657 2.657a.5.5 0 01-.707.707L10 10.707l-2.657 2.657a.5.5 0 01-.707-.707L9.293 10 6.636 7.343a.5.5 0 010-.707z" clipRule="evenodd" />
         <path d="M10 2a.5.5 0 01.5.5V4a.5.5 0 01-1 0V2.5A.5.5 0 0110 2zM13.5 4.793a.5.5 0 01.354.146l1.06 1.06a.5.5 0 01-.707.708L13.146 5.646a.5.5 0 01.354-.853z" />
     </svg>
@@ -39,7 +39,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onNavigateHome, onNavigate
                     )}
                      <div className="flex items-center space-x-2 cursor-pointer" onClick={onNavigateHome}>
                         <CitrusIcon />
-                        <h1 className="text-xl md:text-2xl font-bold text-slate-100">
+                        <h1 className="text-xl md:text-2xl font-bold text-green-400">
                             Groenkloof QC App
                         </h1>
                     </div>

@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useMemo } from 'react';
 import { Run, FinalPalletQcData, CommodityData, CartonConfig, Size, BoxType, FinalPalletQcEntry, User } from '../../types';
 import Card from '../ui/Card';
@@ -122,8 +123,8 @@ const FinalPalletQcPage: React.FC<FinalPalletQcPageProps> = ({ run, onSave, comm
         const photoData = pallet.photos[photoType];
         return (
             <div className="flex flex-col items-center justify-center space-y-2">
-                <Label className="font-semibold text-slate-900">{label}</Label>
-                <div className="relative group w-48 h-48 bg-slate-100 rounded-lg flex items-center justify-center border-2 border-dashed border-slate-300">
+                <Label className="font-semibold text-slate-200">{label}</Label>
+                <div className="relative group w-48 h-48 bg-slate-700 rounded-lg flex items-center justify-center border-2 border-dashed border-slate-600">
                     {photoData ? (
                         <>
                             <img src={photoData} alt={label} className="w-full h-full object-contain rounded-lg" />
@@ -144,7 +145,7 @@ const FinalPalletQcPage: React.FC<FinalPalletQcPageProps> = ({ run, onSave, comm
                         <button
                             type="button"
                             onClick={() => handleAddPhotoClick(pallet.id, photoType)}
-                            className="text-slate-500 hover:text-orange-500 transition-colors p-4 text-center disabled:cursor-not-allowed"
+                            className="text-slate-400 hover:text-orange-500 transition-colors p-4 text-center disabled:cursor-not-allowed"
                             disabled={isReadOnly}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -164,14 +165,14 @@ const FinalPalletQcPage: React.FC<FinalPalletQcPageProps> = ({ run, onSave, comm
             <form onSubmit={handleSubmit}>
                 <Card>
                     {isReadOnly && (
-                        <div className="p-4 mb-6 text-center bg-yellow-100 border border-yellow-300 text-yellow-800 rounded-lg">
+                        <div className="p-4 mb-6 text-center bg-yellow-900 border border-yellow-700 text-yellow-100 rounded-lg">
                             <p className="font-semibold">Read-Only Mode: This form is for viewing or approval.</p>
                         </div>
                     )}
-                    <div className="flex flex-wrap justify-between items-start border-b border-slate-200 pb-4 mb-6 gap-4">
+                    <div className="flex flex-wrap justify-between items-start border-b border-slate-700 pb-4 mb-6 gap-4">
                         <div>
-                            <h2 className="text-3xl font-bold text-slate-800">Final Pallet QC</h2>
-                            <p className="text-slate-500 mt-1">Take photos for Run: <span className="font-semibold text-orange-600">{run.runNumber}</span></p>
+                            <h2 className="text-3xl font-bold text-green-400">Final Pallet QC</h2>
+                            <p className="text-slate-400 mt-1">Take photos for Run: <span className="font-semibold text-orange-500">{run.runNumber}</span></p>
                         </div>
                         {!isReadOnly && <Button type="button" onClick={handleAddPallet}>Add New Pallet QC</Button>}
                     </div>
@@ -194,32 +195,32 @@ const FinalPalletQcPage: React.FC<FinalPalletQcPageProps> = ({ run, onSave, comm
                     )}
                     {pallets.map(pallet => (
                         <Card key={pallet.id}>
-                            <div className="flex justify-between items-start mb-6 border-b border-slate-200 pb-4">
+                            <div className="flex justify-between items-start mb-6 border-b border-slate-700 pb-4">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-grow">
                                     <div>
                                         <Label htmlFor={`size-${pallet.id}`}>Size</Label>
-                                        <select id={`size-${pallet.id}`} value={pallet.size} onChange={e => handlePalletDetailChange(pallet.id, 'size', e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-900 disabled:bg-slate-100 disabled:cursor-not-allowed" disabled={isReadOnly}>
+                                        <select id={`size-${pallet.id}`} value={pallet.size} onChange={e => handlePalletDetailChange(pallet.id, 'size', e.target.value)} className="mt-1 block w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-100 disabled:bg-slate-800 disabled:cursor-not-allowed" disabled={isReadOnly}>
                                             <option value="">Select Size</option>
                                             {sizes.map(s => <option key={s.code} value={s.code}>{s.code}</option>)}
                                         </select>
                                     </div>
                                     <div>
                                         <Label htmlFor={`class-${pallet.id}`}>Class</Label>
-                                        <select id={`class-${pallet.id}`} value={pallet.class} onChange={e => handlePalletDetailChange(pallet.id, 'class', e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-900 disabled:bg-slate-100 disabled:cursor-not-allowed" disabled={isReadOnly}>
+                                        <select id={`class-${pallet.id}`} value={pallet.class} onChange={e => handlePalletDetailChange(pallet.id, 'class', e.target.value)} className="mt-1 block w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-100 disabled:bg-slate-800 disabled:cursor-not-allowed" disabled={isReadOnly}>
                                             <option value="">Select Class</option>
                                             {classes.map(c => <option key={c} value={c}>{c}</option>)}
                                         </select>
                                     </div>
                                     <div>
                                         <Label htmlFor={`boxType-${pallet.id}`}>Box Type</Label>
-                                        <select id={`boxType-${pallet.id}`} value={pallet.boxType} onChange={e => handlePalletDetailChange(pallet.id, 'boxType', e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-900 disabled:bg-slate-100 disabled:cursor-not-allowed" disabled={isReadOnly}>
+                                        <select id={`boxType-${pallet.id}`} value={pallet.boxType} onChange={e => handlePalletDetailChange(pallet.id, 'boxType', e.target.value)} className="mt-1 block w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-100 disabled:bg-slate-800 disabled:cursor-not-allowed" disabled={isReadOnly}>
                                             <option value="">Select Box Type</option>
                                             {boxTypes.map(bt => <option key={bt.name} value={bt.name}>{bt.name}</option>)}
                                         </select>
                                     </div>
                                 </div>
                                 {!isReadOnly && (
-                                    <button type="button" onClick={() => handleDeletePallet(pallet.id)} className="text-red-500 hover:text-red-700 p-1 rounded-full transition-colors ml-4">
+                                    <button type="button" onClick={() => handleDeletePallet(pallet.id)} className="text-red-500 hover:text-red-400 p-1 rounded-full transition-colors ml-4">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                     </button>
                                 )}
@@ -235,7 +236,7 @@ const FinalPalletQcPage: React.FC<FinalPalletQcPageProps> = ({ run, onSave, comm
                 </div>
 
                 {pallets.length > 0 && (
-                    <div className="mt-10 pt-6 border-t border-slate-200 text-center">
+                    <div className="mt-10 pt-6 border-t border-slate-700 text-center">
                         {isReadOnly ? (
                             !isApproved && (
                                 <Button type="button" onClick={handleApproveClick} className="w-full max-w-sm bg-green-600 hover:bg-green-700 focus:ring-green-500">

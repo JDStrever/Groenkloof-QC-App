@@ -30,7 +30,7 @@ const QcRunPage: React.FC<QcRunPageProps> = ({ run, onNavigate }) => {
     <div className="max-w-4xl mx-auto">
         <Card>
             <div className="border-b border-slate-700 pb-6 mb-6">
-                <h2 className="text-3xl font-bold text-orange-500">QC for Run: {run.runNumber}</h2>
+                <h2 className="text-3xl font-bold text-green-400">QC for Run: {run.runNumber}</h2>
                 <p className="text-slate-400 mt-1">Select a quality control task for this run.</p>
             </div>
             

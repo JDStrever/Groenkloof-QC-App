@@ -40,7 +40,7 @@ const PlaasSetupPage: React.FC<PlaasSetupPageProps> = ({ onDeliveryCreated }) =>
     <div className="max-w-2xl mx-auto">
       <Card>
         <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-slate-100">Setup New Delivery</h2>
+            <h2 className="text-3xl font-bold text-green-400">Setup New Delivery</h2>
             <p className="text-slate-400 mt-2">Enter the details for the new fruit delivery.</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">

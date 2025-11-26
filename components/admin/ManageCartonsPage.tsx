@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { CartonConfig, CommodityData, BoxType } from '../../types';
 import Card from '../ui/Card';
@@ -93,15 +94,15 @@ const ManageCartonsPage: React.FC<ManageCartonsPageProps> = ({ initialCartonConf
 
   return (
     <Card>
-      <div className="border-b border-slate-200 pb-4 mb-6">
-        <h2 className="text-3xl font-bold text-slate-800">Manage Kartonne</h2>
-        <p className="text-slate-500 mt-1">Manage fruit classes and box types for QC.</p>
+      <div className="border-b border-slate-700 pb-4 mb-6">
+        <h2 className="text-3xl font-bold text-green-400">Manage Kartonne</h2>
+        <p className="text-slate-400 mt-1">Manage fruit classes and box types for QC.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Manage Classes */}
         <div>
-          <h3 className="text-xl font-semibold text-slate-700 mb-4">Fruit Classes</h3>
+          <h3 className="text-xl font-semibold text-green-400 mb-4">Fruit Classes</h3>
           <div className="flex gap-2 mb-4">
             <Input
               value={newClassName}
@@ -111,11 +112,11 @@ const ManageCartonsPage: React.FC<ManageCartonsPageProps> = ({ initialCartonConf
             />
             <Button type="button" onClick={handleAddClass} className="px-4 py-2 text-sm">Add</Button>
           </div>
-          <ul className="space-y-2 border rounded-lg p-3 min-h-[200px] bg-slate-50">
+          <ul className="space-y-2 border border-slate-700 rounded-lg p-3 min-h-[200px] bg-slate-900/50">
             {config.classes.map(className => (
-              <li key={className} className="flex justify-between items-center bg-white p-2 rounded-md shadow-sm">
-                <span className="font-medium text-slate-800">{className}</span>
-                <button onClick={() => handleRemoveClass(className)} className="text-red-500 hover:text-red-700 text-sm font-semibold">Remove</button>
+              <li key={className} className="flex justify-between items-center bg-slate-700 p-2 rounded-md shadow-sm border border-slate-600">
+                <span className="font-medium text-slate-200">{className}</span>
+                <button onClick={() => handleRemoveClass(className)} className="text-red-400 hover:text-red-300 text-sm font-semibold">Remove</button>
               </li>
             ))}
           </ul>
@@ -123,14 +124,14 @@ const ManageCartonsPage: React.FC<ManageCartonsPageProps> = ({ initialCartonConf
 
         {/* Manage Box Types */}
         <div>
-          <h3 className="text-xl font-semibold text-slate-700 mb-4">Box Types per Commodity</h3>
+          <h3 className="text-xl font-semibold text-green-400 mb-4">Box Types per Commodity</h3>
           <div className="mb-4">
             <Label htmlFor="commodity-select">Select Commodity</Label>
             <select
               id="commodity-select"
               value={selectedCommodity}
               onChange={e => setSelectedCommodity(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm text-slate-900"
+              className="mt-1 block w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md shadow-sm text-slate-100 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
             >
               {Object.keys(commodityData).map(name => (
                 <option key={name} value={name}>{name}</option>
@@ -148,17 +149,17 @@ const ManageCartonsPage: React.FC<ManageCartonsPageProps> = ({ initialCartonConf
                 />
                 <Button type="button" onClick={handleAddBoxType} className="px-4 py-2 text-sm">Add</Button>
               </div>
-              <ul className="space-y-2 border rounded-lg p-3 min-h-[200px] bg-slate-50 max-h-[400px] overflow-y-auto">
+              <ul className="space-y-2 border border-slate-700 rounded-lg p-3 min-h-[200px] bg-slate-900/50 max-h-[400px] overflow-y-auto">
                 {(config.boxTypes[getMappedCommodity(selectedCommodity)] || []).map(boxType => (
-                  <li key={boxType.name} className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-3 rounded-md shadow-sm gap-2">
-                    <span className="font-medium text-slate-800 flex-1">{boxType.name}</span>
+                  <li key={boxType.name} className="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-700 p-3 rounded-md shadow-sm gap-2 border border-slate-600">
+                    <span className="font-medium text-slate-200 flex-1">{boxType.name}</span>
                     <div className="flex items-center gap-2">
                         <Label htmlFor={`min-${boxType.name}`} className="sr-only">Min Weight</Label>
                         <Input id={`min-${boxType.name}`} type="number" step="0.01" placeholder="Min kg" value={boxType.minWeight} onChange={(e) => handleBoxTypeChange(boxType.name, 'minWeight', e.target.value)} className="w-24 text-center" />
                         <Label htmlFor={`max-${boxType.name}`} className="sr-only">Max Weight</Label>
                         <Input id={`max-${boxType.name}`} type="number" step="0.01" placeholder="Max kg" value={boxType.maxWeight} onChange={(e) => handleBoxTypeChange(boxType.name, 'maxWeight', e.target.value)} className="w-24 text-center" />
                     </div>
-                    <button onClick={() => handleRemoveBoxType(boxType.name)} className="text-red-500 hover:text-red-700 text-sm font-semibold self-center md:self-auto">Remove</button>
+                    <button onClick={() => handleRemoveBoxType(boxType.name)} className="text-red-400 hover:text-red-300 text-sm font-semibold self-center md:self-auto">Remove</button>
                   </li>
                 ))}
               </ul>

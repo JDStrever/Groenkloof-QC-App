@@ -44,7 +44,7 @@ const MrlIcon = () => (
 const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   return (
     <div className="text-center">
-        <h2 className="text-3xl font-bold text-slate-100 mb-4">Welcome</h2>
+        <h2 className="text-3xl font-bold text-green-400 mb-4">Welcome</h2>
         <p className="text-lg text-slate-400 mb-12 max-w-2xl mx-auto">Select an option to begin tracking quality control data for your citrus runs.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <Card

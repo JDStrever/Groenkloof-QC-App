@@ -54,10 +54,10 @@ const ManageRunInfoPage: React.FC<ManageRunInfoPageProps> = ({ runConfig, onUpda
   return (
     <Card>
       <div className="border-b border-slate-700 pb-4 mb-6">
-        <h2 className="text-3xl font-bold text-slate-100">Manage Run Info</h2>
+        <h2 className="text-3xl font-bold text-green-400">Manage Run Info</h2>
         <p className="text-slate-400 mt-1">Manage dropdown options for Run Setup.</p>
-        <div className="mt-2 p-2 bg-blue-900 text-blue-100 border border-blue-700 rounded text-sm">
-            <strong>Note:</strong> Commodities are managed in the <span className="font-semibold">Manage Commodities</span> page to ensure they are linked to size data.
+        <div className="mt-2 p-2 bg-blue-900/50 text-blue-200 border border-blue-700 rounded text-sm">
+            <strong>Note:</strong> Commodities are managed in the <span className="font-semibold text-white">Manage Commodities</span> page to ensure they are linked to size data.
         </div>
       </div>
 
@@ -82,7 +82,7 @@ const ManageRunInfoPage: React.FC<ManageRunInfoPageProps> = ({ runConfig, onUpda
 
         {/* Content */}
         <div className="md:w-3/4">
-          <h3 className="text-xl font-semibold text-slate-200 mb-4">
+          <h3 className="text-xl font-semibold text-green-400 mb-4">
             Manage {tabs.find(t => t.key === activeTab)?.label}
           </h3>
 

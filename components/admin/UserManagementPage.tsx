@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { User, View } from '../../types';
 import Card from '../ui/Card';
@@ -91,24 +92,24 @@ const UserManagementPage: React.FC<UserManagementPageProps> = ({ users, onUpdate
 
   return (
     <Card>
-      <div className="border-b border-slate-200 pb-4 mb-6">
-        <h2 className="text-3xl font-bold text-slate-800">Manage Users</h2>
-        <p className="text-slate-500 mt-1">Add new users and manage their access permissions.</p>
+      <div className="border-b border-slate-700 pb-4 mb-6">
+        <h2 className="text-3xl font-bold text-green-400">Manage Users</h2>
+        <p className="text-slate-400 mt-1">Add new users and manage their access permissions.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-1 flex flex-col">
-            <h3 className="text-xl font-semibold text-slate-700 mb-4">Users</h3>
+            <h3 className="text-xl font-semibold text-green-400 mb-4">Users</h3>
             <Button onClick={() => { setIsAddingUser(true); setSelectedUser(null); }} className="w-full mb-4">
                 Add New User
             </Button>
-            <div className="border rounded-lg p-2 flex-grow min-h-[400px]">
+            <div className="border border-slate-700 rounded-lg p-2 flex-grow min-h-[400px] bg-slate-900/50">
                 <ul className="space-y-2 h-full overflow-y-auto">
                     {users.map(user => (
                     <li key={user.id}>
                         <button
                         onClick={() => handleSelectUser(user)}
-                        className={`w-full text-left px-4 py-2 rounded-md transition-colors ${selectedUser?.id === user.id ? 'bg-orange-500 text-black font-semibold' : 'hover:bg-slate-100'}`}
+                        className={`w-full text-left px-4 py-2 rounded-md transition-colors ${selectedUser?.id === user.id ? 'bg-orange-600 text-white font-semibold' : 'hover:bg-slate-700 text-slate-300'}`}
                         >
                         {user.username}
                         </button>
@@ -122,20 +123,20 @@ const UserManagementPage: React.FC<UserManagementPageProps> = ({ users, onUpdate
           {selectedUser && (
             <div>
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-slate-700">Permissions for <span className="text-orange-600">{selectedUser.username}</span></h3>
-                <Button onClick={handleDeleteUser} className="bg-red-500 hover:bg-red-600 focus:ring-red-500 text-sm px-3 py-1">Delete User</Button>
+                <h3 className="text-xl font-semibold text-slate-200">Permissions for <span className="text-orange-500">{selectedUser.username}</span></h3>
+                <Button onClick={handleDeleteUser} className="bg-red-600 hover:bg-red-700 focus:ring-red-500 text-sm px-3 py-1">Delete User</Button>
               </div>
               
               <div className="space-y-3">
                   {PERMISSION_VIEWS.map(({ key, label }) => (
-                      <label key={key} className="flex items-center p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
+                      <label key={key} className="flex items-center p-3 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 border border-slate-600">
                           <input
                               type="checkbox"
                               checked={editedPermissions.includes(key)}
                               onChange={() => handleTogglePermission(key)}
-                              className="h-5 w-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                              className="h-5 w-5 rounded border-slate-500 bg-slate-800 text-orange-600 focus:ring-orange-500"
                           />
-                          <span className="ml-3 text-sm font-medium text-slate-800">{label}</span>
+                          <span className="ml-3 text-sm font-medium text-slate-200">{label}</span>
                       </label>
                   ))}
               </div>
@@ -147,8 +148,8 @@ const UserManagementPage: React.FC<UserManagementPageProps> = ({ users, onUpdate
 
           {isAddingUser && (
              <div>
-                <h3 className="text-xl font-semibold text-slate-700 mb-4">Add New User</h3>
-                <form onSubmit={handleAddNewUser} className="space-y-4 p-4 bg-slate-50 rounded-lg">
+                <h3 className="text-xl font-semibold text-green-400 mb-4">Add New User</h3>
+                <form onSubmit={handleAddNewUser} className="space-y-4 p-4 bg-slate-700 rounded-lg border border-slate-600">
                     <div>
                         <Label htmlFor="new-username">Username</Label>
                         <Input id="new-username" value={newUser.username} onChange={e => setNewUser(p => ({...p, username: e.target.value}))} required />
@@ -158,7 +159,7 @@ const UserManagementPage: React.FC<UserManagementPageProps> = ({ users, onUpdate
                         <Input id="new-password" type="password" value={newUser.password} onChange={e => setNewUser(p => ({...p, password: e.target.value}))} required />
                     </div>
                     <div className="flex justify-end gap-2 pt-2">
-                        <Button type="button" onClick={() => setIsAddingUser(false)} className="bg-slate-500 hover:bg-slate-600">Cancel</Button>
+                        <Button type="button" onClick={() => setIsAddingUser(false)} className="bg-slate-600 hover:bg-slate-500">Cancel</Button>
                         <Button type="submit">Create User</Button>
                     </div>
                 </form>
@@ -166,7 +167,7 @@ const UserManagementPage: React.FC<UserManagementPageProps> = ({ users, onUpdate
           )}
 
           {!selectedUser && !isAddingUser && (
-             <div className="flex items-center justify-center h-full bg-slate-50 rounded-lg border-2 border-dashed">
+             <div className="flex items-center justify-center h-full bg-slate-900/50 rounded-lg border-2 border-dashed border-slate-700">
               <p className="text-slate-500 text-lg text-center p-4">Select a user to edit permissions, or add a new user.</p>
             </div>
           )}

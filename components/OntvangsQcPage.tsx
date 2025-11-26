@@ -189,7 +189,7 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
         <Card>
             <div className="flex flex-wrap justify-between items-start border-b border-slate-700 pb-6 mb-6 gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold text-purple-500">Ontvangs QC for: {delivery.deliveryNote}</h2>
+                    <h2 className="text-3xl font-bold text-green-400">Ontvangs QC for: {delivery.deliveryNote}</h2>
                     <p className="text-slate-400 mt-1">Details for the selected delivery are shown below.</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
