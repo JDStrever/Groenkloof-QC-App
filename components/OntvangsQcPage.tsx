@@ -1,8 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { Delivery, ExternalQualityData, DefectsData, InternalQualityData, InternalQualityDataKey, CommodityData, Size } from '../types';
 import Card from './ui/Card';
 import Button from './ui/Button';
-import { GoogleGenAI } from '@google/genai';
 import ExternalQualityForm, { QUALITY_CLASSES, CustomDefect, initialInternalQuality, CUSTOM_DEFECT_COUNT } from './forms/ExternalQualityForm';
 import { getSizesForCommodity } from '../../utils/commodityHelper';
 import { DEFECTS } from '../../constants/commoditySizes';
@@ -24,7 +24,6 @@ const InfoPill: React.FC<{ label: string; value: string }> = ({ label, value }) 
 
 const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspection, commodityData }) => {
   const [loading, setLoading] = useState(false);
-  const [qcSuggestions, setQcSuggestions] = useState('');
   
   const [qualityData, setQualityData] = useState<ExternalQualityData>({});
   const [defectsData, setDefectsData] = useState<DefectsData>({});
@@ -90,41 +89,6 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
       internalQualityData.titration,
   ]);
 
-
-  const getQCSuggestions = async () => {
-    setLoading(true);
-    setQcSuggestions('');
-    if (!process.env.API_KEY) {
-      setQcSuggestions('API key is not set. Please configure the API_KEY environment variable.');
-      setLoading(false);
-      return;
-    }
-    try {
-      const ai = new GoogleGenAI({apiKey: process.env.API_KEY});
-
-      const prompt = `Based on the following citrus fruit delivery details, suggest 3 key quality control checks to perform.
-      - Commodity: ${delivery.commodity}
-      - Variety: ${delivery.variety}
-      - Farm: ${delivery.farmName}
-      - Orchard (Boord): ${delivery.boord}
-      - Exporter: ${delivery.exporter}
-      Format the response as a simple list.`;
-      
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-      });
-      
-      const text = response.text;
-      setQcSuggestions(text);
-    } catch (error) {
-      console.error("Error fetching QC suggestions:", error);
-      setQcSuggestions('Sorry, could not fetch suggestions at this time.');
-    } finally {
-      setLoading(false);
-    }
-  };
-  
   const generateCsvContent = () => {
     const sizes = getSizesForCommodity(delivery.commodity, commodityData);
     const sizeHeaders = sizes.map(s => `"${s.code}"`).join(',');
@@ -246,20 +210,6 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
                 <InfoPill label="Commodity" value={delivery.commodity} />
                 <InfoPill label="Variety" value={delivery.variety} />
                 <InfoPill label="Date Received" value={delivery.dateReceived} />
-            </div>
-
-            <div className="bg-slate-50 rounded-lg p-6">
-                <h3 className="text-xl font-semibold mb-4 text-slate-700">AI-Powered QC Suggestions</h3>
-                <p className="text-slate-500 mb-4">Get suggestions for important quality checks for this specific delivery.</p>
-                <Button onClick={getQCSuggestions} disabled={loading}>
-                    {loading ? 'Getting Suggestions...' : 'Suggest QC Checks'}
-                </Button>
-                {qcSuggestions && (
-                    <div className="mt-6 p-4 bg-white rounded border border-slate-200">
-                        <h4 className="font-bold text-slate-800 mb-2">Suggestions:</h4>
-                        <div className="prose prose-sm max-w-none text-slate-600 whitespace-pre-wrap">{qcSuggestions}</div>
-                    </div>
-                )}
             </div>
         </Card>
         

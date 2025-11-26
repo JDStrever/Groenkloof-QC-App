@@ -145,7 +145,7 @@ const ClassEvaluationPage: React.FC<ClassEvaluationPageProps> = ({ run, onSaveCl
   };
 
   const getTotalCount = (counts: ClassEvaluationSample['counts']): number => {
-    return Object.values(counts).reduce((sum: number, current) => {
+    return Object.values(counts).reduce((sum: number, current: number | string) => {
         const val = typeof current === 'number' ? current : 0;
         return sum + val;
     }, 0);
