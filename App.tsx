@@ -90,7 +90,8 @@ const App: React.FC = () => {
             setMrlRecords(fetchedMrls);
             setCommodityData(fetchedCommodityData);
             setCartonConfig(fetchedCartonConfig);
-            setRunConfig(fetchedRunConfig);
+            // Merge defaults with fetched config to ensure all keys exist
+            setRunConfig({ ...DEFAULT_RUN_CONFIG, ...fetchedRunConfig });
             setUsers(fetchedUsers);
 
             // Handle session persistence

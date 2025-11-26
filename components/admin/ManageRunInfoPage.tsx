@@ -25,11 +25,12 @@ const ManageRunInfoPage: React.FC<ManageRunInfoPageProps> = ({ runConfig, onUpda
   const handleAddItem = (e: React.FormEvent) => {
     e.preventDefault();
     if (newItem.trim()) {
-      const currentList = runConfig[activeTab] || [];
+      const currentList = [...(runConfig[activeTab] || [])];
       if (!currentList.includes(newItem.trim())) {
+        const updatedList = [...currentList, newItem.trim()].sort();
         const newConfig = {
           ...runConfig,
-          [activeTab]: [...currentList, newItem.trim()].sort(),
+          [activeTab]: updatedList,
         };
         onUpdate(newConfig);
         setNewItem('');
@@ -87,6 +88,7 @@ const ManageRunInfoPage: React.FC<ManageRunInfoPageProps> = ({ runConfig, onUpda
 
           <form onSubmit={handleAddItem} className="flex gap-2 mb-6">
             <Input
+              type="text"
               value={newItem}
               onChange={(e) => setNewItem(e.target.value)}
               placeholder={`Add new ${tabs.find(t => t.key === activeTab)?.label.slice(0, -1)}`}
