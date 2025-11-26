@@ -39,7 +39,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onNavigateHome, onNavigate
                      <div className="flex items-center space-x-2 cursor-pointer" onClick={onNavigateHome}>
                         <CitrusIcon />
                         <h1 className="text-xl md:text-2xl font-bold text-slate-800">
-                            Frutia QC App
+                            Groenkloof QC App
                         </h1>
                     </div>
                 </div>

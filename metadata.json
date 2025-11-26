@@ -1,5 +1,5 @@
 {
-  "name": "Frutia QC App",
+  "name": "Groenkloof QC App",
   "description": "An application for citrus packhouses to manage and track Quality Control (QC) data for each batch of fruit, streamlining traceability and simplifying data entry.",
   "requestFramePermissions": [
     "camera"
