@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Run, ClassEvaluationSample, CommodityData, CartonConfig, Size, EvaluationDefects, ClassEvaluationEntry, CustomEvaluationDefect, User } from '../../types';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
@@ -25,7 +25,6 @@ const ClassEvaluationPage: React.FC<ClassEvaluationPageProps> = ({ run, onSaveCl
   const [samples, setSamples] = useState<ClassEvaluationSample[]>(() => {
     if (isReadOnly && entryToView) {
         const initialSamples = entryToView.samples || [];
-        // FIX: Ensure correct typing for custom defects during initialization.
         return initialSamples.map(sample => {
         const existingCustoms = sample.customDefects || [];
         const paddedCustoms: CustomEvaluationDefect[] = Array.from({ length: CUSTOM_DEFECT_COUNT }, (_, i) =>
@@ -36,6 +35,7 @@ const ClassEvaluationPage: React.FC<ClassEvaluationPageProps> = ({ run, onSaveCl
             sampleSize: sample.sampleSize || '',
             defects: sample.defects || {},
             customDefects: paddedCustoms,
+            photos: sample.photos || []
         };
         });
     }
@@ -44,6 +44,11 @@ const ClassEvaluationPage: React.FC<ClassEvaluationPageProps> = ({ run, onSaveCl
 
   const [newSampleSize, setNewSampleSize] = useState<string>('');
   const [newSampleClass, setNewSampleClass] = useState<string>('');
+  
+  // Photo handling
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const [activePhotoSampleId, setActivePhotoSampleId] = useState<string | null>(null);
 
   const sizes: Size[] = useMemo(() => getSizesForCommodity(run.commodity, commodityData), [run.commodity, commodityData]);
   const classes: string[] = useMemo(() => cartonConfig.classes || [], [cartonConfig.classes]);
@@ -61,6 +66,7 @@ const ClassEvaluationPage: React.FC<ClassEvaluationPageProps> = ({ run, onSaveCl
       counts: { vsa: '', klas1: '', klas2: '', klas3: '' },
       defects: {},
       customDefects: Array.from({ length: CUSTOM_DEFECT_COUNT }, () => ({ name: '', counts: { klas1: '', klas2: '', klas3: '' } })),
+      photos: []
     };
     setSamples(prev => [...prev, newSample]);
     setNewSampleSize('');
@@ -69,7 +75,6 @@ const ClassEvaluationPage: React.FC<ClassEvaluationPageProps> = ({ run, onSaveCl
 
   const handleSampleSizeChange = (sampleId: string, value: string) => {
     const numValue = value === '' ? '' : parseInt(value, 10);
-    // FIX: Replaced unsafe `as number` cast with a type guard to safely check for NaN.
     if (typeof numValue === 'number' && isNaN(numValue)) return;
     setSamples(prev => prev.map(sample =>
       sample.id === sampleId ? { ...sample, sampleSize: numValue } : sample
@@ -78,7 +83,6 @@ const ClassEvaluationPage: React.FC<ClassEvaluationPageProps> = ({ run, onSaveCl
 
   const handleCountChange = (sampleId: string, evalClass: keyof ClassEvaluationSample['counts'], value: string) => {
     const numValue = value === '' ? '' : parseInt(value, 10);
-    // FIX: Replaced unsafe `as number` cast with a type guard to safely check for NaN.
     if (typeof numValue === 'number' && isNaN(numValue)) return;
     setSamples(prev => prev.map(sample => {
       if (sample.id === sampleId) {
@@ -91,7 +95,6 @@ const ClassEvaluationPage: React.FC<ClassEvaluationPageProps> = ({ run, onSaveCl
 
   const handleDefectChange = (sampleId: string, defectName: string, className: 'klas1' | 'klas2' | 'klas3', value: string) => {
     const numValue = value === '' ? '' : parseInt(value, 10);
-    // FIX: Replaced unsafe `as number` cast with a type guard to safely check for NaN.
     if (typeof numValue === 'number' && isNaN(numValue)) return;
     setSamples(prev => prev.map(sample => {
       if (sample.id === sampleId) {
@@ -115,7 +118,6 @@ const ClassEvaluationPage: React.FC<ClassEvaluationPageProps> = ({ run, onSaveCl
           defectToUpdate.name = value;
         } else {
           const numValue = value === '' ? '' : parseInt(value, 10);
-          // FIX: Replaced unsafe `as number` cast with a type guard to safely check for NaN.
           if (typeof numValue === 'number' && isNaN(numValue)) return sample;
           defectToUpdate.counts[field] = numValue;
         }
@@ -130,6 +132,57 @@ const ClassEvaluationPage: React.FC<ClassEvaluationPageProps> = ({ run, onSaveCl
       setSamples(prev => prev.filter(sample => sample.id !== sampleId));
     }
   };
+  
+  // --- Photo Handling ---
+
+  const handleAddPhotoClick = (sampleId: string, source: 'camera' | 'gallery') => {
+      if (isReadOnly) return;
+      setActivePhotoSampleId(sampleId);
+      if (source === 'camera') {
+          cameraInputRef.current?.click();
+      } else {
+          galleryInputRef.current?.click();
+      }
+  };
+
+  const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (!files || files.length === 0 || !activePhotoSampleId) return;
+
+      // Process multiple files
+      for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const reader = new FileReader();
+          reader.onload = (loadEvent) => {
+              if (loadEvent.target?.result) {
+                  const base64Data = loadEvent.target.result as string;
+                  setSamples(prev => prev.map(sample => {
+                      if (sample.id === activePhotoSampleId) {
+                          return { ...sample, photos: [...(sample.photos || []), base64Data] };
+                      }
+                      return sample;
+                  }));
+              }
+          };
+          reader.readAsDataURL(file);
+      }
+      
+      e.target.value = '';
+      setActivePhotoSampleId(null);
+  };
+
+  const handleRemovePhoto = (sampleId: string, photoIndex: number) => {
+      if (isReadOnly) return;
+      setSamples(prev => prev.map(sample => {
+          if (sample.id === sampleId) {
+              const newPhotos = [...(sample.photos || [])];
+              newPhotos.splice(photoIndex, 1);
+              return { ...sample, photos: newPhotos };
+          }
+          return sample;
+      }));
+  };
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,6 +202,19 @@ const ClassEvaluationPage: React.FC<ClassEvaluationPageProps> = ({ run, onSaveCl
         const val = typeof current === 'number' ? current : 0;
         return sum + val;
     }, 0);
+  };
+  
+  const getTotalDefects = (sample: ClassEvaluationSample): number => {
+      let total = 0;
+      // Standard defects
+      Object.values(sample.defects || {}).forEach(d => {
+          total += (Number(d.klas1)||0) + (Number(d.klas2)||0) + (Number(d.klas3)||0);
+      });
+      // Custom defects
+      sample.customDefects?.forEach(d => {
+          total += (Number(d.counts.klas1)||0) + (Number(d.counts.klas2)||0) + (Number(d.counts.klas3)||0);
+      });
+      return total;
   };
   
   const isApproved = entryToView?.approvalDetails?.status === 'approved';
@@ -190,6 +256,26 @@ const ClassEvaluationPage: React.FC<ClassEvaluationPageProps> = ({ run, onSaveCl
                 </div>
             </div>
           )}
+          
+          {/* Hidden File Inputs */}
+          <input 
+              type="file" 
+              ref={galleryInputRef} 
+              onChange={handleFileSelected}
+              accept="image/*" 
+              multiple 
+              className="hidden" 
+              disabled={isReadOnly}
+          />
+          <input 
+              type="file" 
+              ref={cameraInputRef} 
+              onChange={handleFileSelected}
+              accept="image/*"
+              capture="environment"
+              className="hidden" 
+              disabled={isReadOnly}
+          />
         </Card>
 
         <div className="mt-8 space-y-8">
@@ -201,6 +287,8 @@ const ClassEvaluationPage: React.FC<ClassEvaluationPageProps> = ({ run, onSaveCl
             samples.map(sample => {
               const totalCount = getTotalCount(sample.counts);
               const sampleSize = Number(sample.sampleSize) || 0;
+              const totalDefects = getTotalDefects(sample);
+              
               return (
                 <Card key={sample.id}>
                   <div className="flex justify-between items-start mb-4 border-b border-slate-700 pb-3">
@@ -287,8 +375,67 @@ const ClassEvaluationPage: React.FC<ClassEvaluationPageProps> = ({ run, onSaveCl
                             );
                           })}
                         </tbody>
+                        <tfoot className="bg-slate-700">
+                            <tr>
+                                <td colSpan={4} className="px-4 py-3 text-right text-sm font-bold text-slate-200">
+                                    Totale defekte gekry:
+                                </td>
+                                <td className="px-4 py-3 text-center text-lg font-bold text-orange-500">
+                                    {totalDefects}
+                                </td>
+                            </tr>
+                        </tfoot>
                       </table>
                     </div>
+                  </div>
+                  
+                  {/* Photos Section */}
+                  <div className="mt-8 pt-6 border-t border-slate-700">
+                      <h4 className="text-lg font-semibold text-green-400 mb-4">Sample Photos</h4>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                          {sample.photos?.map((photo, pIndex) => (
+                              <div key={pIndex} className="relative group aspect-square">
+                                  <img src={photo} alt={`Sample photo ${pIndex + 1}`} className="w-full h-full object-cover rounded-lg shadow-md border border-slate-600" />
+                                  {!isReadOnly && (
+                                      <button 
+                                          type="button" 
+                                          onClick={() => handleRemovePhoto(sample.id, pIndex)}
+                                          className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                      >
+                                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                          </svg>
+                                      </button>
+                                  )}
+                              </div>
+                          ))}
+                          
+                          {!isReadOnly && (
+                              <div className="aspect-square flex flex-col gap-2">
+                                  <button 
+                                      type="button"
+                                      onClick={() => handleAddPhotoClick(sample.id, 'camera')}
+                                      className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-600 rounded-lg text-slate-400 hover:bg-slate-700 hover:border-orange-500 hover:text-orange-500 transition-colors"
+                                  >
+                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2-2V9z" />
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                      </svg>
+                                      <span className="text-xs">Camera</span>
+                                  </button>
+                                  <button 
+                                      type="button"
+                                      onClick={() => handleAddPhotoClick(sample.id, 'gallery')}
+                                      className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-600 rounded-lg text-slate-400 hover:bg-slate-700 hover:border-blue-500 hover:text-blue-500 transition-colors"
+                                  >
+                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                      </svg>
+                                      <span className="text-xs">Gallery</span>
+                                  </button>
+                              </div>
+                          )}
+                      </div>
                   </div>
                 </Card>
               )

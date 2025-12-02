@@ -133,6 +133,7 @@ export interface ClassEvaluationSample {
   };
   defects?: EvaluationDefects;
   customDefects?: CustomEvaluationDefect[];
+  photos?: string[];
 }
 
 export interface ClassEvaluationEntry {
