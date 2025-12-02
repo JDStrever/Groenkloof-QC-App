@@ -18,6 +18,7 @@ interface ShelfLifePageProps {
 
 const ShelfLifePage: React.FC<ShelfLifePageProps> = ({ run, onSave, commodityData, cartonConfig, currentUser }) => {
   const [activeBuckets, setActiveBuckets] = useState<ShelfLifeBucket[]>(run.shelfLifeBuckets || []);
+  const [checkComments, setCheckComments] = useState<{ [bucketId: string]: string }>({});
   
   // New Bucket Form State
   const [newSize, setNewSize] = useState('');
@@ -77,7 +78,6 @@ const ShelfLifePage: React.FC<ShelfLifePageProps> = ({ run, onSave, commodityDat
 
   const isCheckDue = (bucket: ShelfLifeBucket): boolean => {
       // Logic: Must be at least 4 days since last check
-      // However, initial check happens at creation (day 0). So next check is day 4.
       // We calculate difference in days. If diff >= 4, check is allowed.
       const lastCheck = bucket.checks[bucket.checks.length - 1];
       const lastDate = new Date(lastCheck.date).setHours(0,0,0,0);
@@ -97,6 +97,13 @@ const ShelfLifePage: React.FC<ShelfLifePageProps> = ({ run, onSave, commodityDat
   };
 
   const handlePerformCheck = (bucketId: string) => {
+      const notes = checkComments[bucketId]?.trim();
+      
+      if (!notes) {
+          alert("Please enter a comment for this check.");
+          return;
+      }
+
       const updatedBuckets = activeBuckets.map(bucket => {
           if (bucket.id === bucketId) {
               return {
@@ -106,15 +113,24 @@ const ShelfLifePage: React.FC<ShelfLifePageProps> = ({ run, onSave, commodityDat
                       {
                           date: new Date().toISOString(),
                           checkedBy: currentUser?.username || 'Unknown',
-                          notes: 'Routine check'
+                          notes: notes
                       }
                   ]
               };
           }
           return bucket;
       });
+      
       setActiveBuckets(updatedBuckets);
       onSave(run.id, updatedBuckets);
+      
+      // Clear comment for this bucket
+      setCheckComments(prev => {
+          const newState = { ...prev };
+          delete newState[bucketId];
+          return newState;
+      });
+      
       alert('Check recorded successfully.');
   };
 
@@ -194,10 +210,11 @@ const ShelfLifePage: React.FC<ShelfLifePageProps> = ({ run, onSave, commodityDat
                 {visibleBuckets.map(bucket => {
                     const checkDue = isCheckDue(bucket);
                     const nextDate = getNextCheckDate(bucket);
+                    const currentComment = checkComments[bucket.id] || '';
                     
                     return (
-                        <div key={bucket.id} className="bg-slate-800 border border-slate-700 rounded-lg p-4 shadow-md flex flex-col md:flex-row justify-between items-center gap-4">
-                            <div className="flex-grow">
+                        <div key={bucket.id} className="bg-slate-800 border border-slate-700 rounded-lg p-4 shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div className="flex-grow w-full md:w-auto">
                                 <div className="flex items-center gap-3 mb-2">
                                     <span className="text-lg font-bold text-orange-400">{bucket.size} / {bucket.class}</span>
                                     <span className="text-sm bg-slate-700 px-2 py-1 rounded border border-slate-600 text-slate-300">{bucket.boxType}</span>
@@ -209,11 +226,23 @@ const ShelfLifePage: React.FC<ShelfLifePageProps> = ({ run, onSave, commodityDat
                                 </div>
                                 <div className="mt-3">
                                     {checkDue ? (
-                                        <div className="inline-flex items-center text-red-400 font-bold bg-red-900/30 px-3 py-1 rounded">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                            </svg>
-                                            Check Due Now!
+                                        <div className="w-full">
+                                            <div className="inline-flex items-center text-red-400 font-bold bg-red-900/30 px-3 py-1 rounded mb-3">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                                </svg>
+                                                Check Due Now!
+                                            </div>
+                                            <div>
+                                                <Label className="text-sm text-slate-300 mb-1">Observations (Required)</Label>
+                                                <textarea
+                                                    value={currentComment}
+                                                    onChange={(e) => setCheckComments(prev => ({ ...prev, [bucket.id]: e.target.value }))}
+                                                    placeholder="Enter observations..."
+                                                    className="w-full p-3 rounded-md bg-white border border-slate-300 text-slate-900 text-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 resize-none"
+                                                    rows={3}
+                                                />
+                                            </div>
                                         </div>
                                     ) : (
                                         <div className="text-green-400 text-sm">
@@ -223,11 +252,11 @@ const ShelfLifePage: React.FC<ShelfLifePageProps> = ({ run, onSave, commodityDat
                                 </div>
                             </div>
                             
-                            <div className="flex flex-col gap-2 w-full md:w-auto min-w-[150px]">
+                            <div className="flex flex-col gap-2 w-full md:w-auto min-w-[150px] self-start md:self-center">
                                 <Button 
                                     onClick={() => handlePerformCheck(bucket.id)} 
-                                    disabled={!checkDue}
-                                    className={`w-full ${checkDue ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-600 opacity-50 cursor-not-allowed'}`}
+                                    disabled={!checkDue || !currentComment.trim()}
+                                    className={`w-full ${checkDue && currentComment.trim() ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-600 opacity-50 cursor-not-allowed'}`}
                                 >
                                     {checkDue ? 'Perform Check' : 'Wait 4 Days'}
                                 </Button>
