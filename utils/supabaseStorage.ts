@@ -1,4 +1,5 @@
 
+
 import { supabase } from '../supabaseClient';
 import { Run, Delivery, MrlRecord, CommodityData, CartonConfig, RunConfig, User } from '../types';
 
@@ -21,7 +22,8 @@ export const fetchRuns = async (): Promise<Run[]> => {
         cartonWeights: row.carton_weights || [],
         cartonEvaluations: row.carton_evaluations || [],
         classEvaluations: row.class_evaluations || [],
-        finalPalletQc: row.final_pallet_qc || []
+        finalPalletQc: row.final_pallet_qc || [],
+        shelfLifeBuckets: row.shelf_life_buckets || []
     }));
 };
 
@@ -39,7 +41,8 @@ export const createRun = async (run: Run) => {
         carton_weights: run.cartonWeights || [],
         carton_evaluations: run.cartonEvaluations || [],
         class_evaluations: run.classEvaluations || [],
-        final_pallet_qc: run.finalPalletQc || []
+        final_pallet_qc: run.finalPalletQc || [],
+        shelf_life_buckets: run.shelfLifeBuckets || []
     });
     if (error) console.error('Error creating run:', error);
 };
@@ -58,7 +61,8 @@ export const updateRun = async (run: Run) => {
         carton_weights: run.cartonWeights,
         carton_evaluations: run.cartonEvaluations,
         class_evaluations: run.classEvaluations,
-        final_pallet_qc: run.finalPalletQc
+        final_pallet_qc: run.finalPalletQc,
+        shelf_life_buckets: run.shelfLifeBuckets
     }).eq('id', run.id);
     if (error) console.error('Error updating run:', error);
 };

@@ -1,5 +1,6 @@
 
-import { Size, CommodityData, SizingEntry, Run, CartonWeightsEntry, CartonEvaluationEntry, ClassEvaluationEntry, FinalPalletQcEntry, CartonEvaluationSample, ClassEvaluationSample, ApprovalDetails } from '../types';
+
+import { Size, CommodityData, SizingEntry, Run, CartonWeightsEntry, CartonEvaluationEntry, ClassEvaluationEntry, FinalPalletQcEntry, CartonEvaluationSample, ClassEvaluationSample, ApprovalDetails, ShelfLifeBucket } from '../types';
 import { DEFECTS } from '../constants/commoditySizes';
 
 declare var JSZip: any;
@@ -185,4 +186,20 @@ export const exportFinalPalletQcPhotosToZip = async (entry: FinalPalletQcEntry, 
         console.error("Error creating ZIP file:", error);
         alert("Failed to create ZIP file. Please try again.");
     }
+};
+
+export const exportShelfLifeToCsv = (bucket: ShelfLifeBucket, run: Run) => {
+    let csvContent = `"Rakleeftyd Report"\n`;
+    csvContent += `"Run Number:",${run.runNumber}\n`;
+    csvContent += `"Box Details:","${bucket.size} / ${bucket.class} / ${bucket.boxType}"\n`;
+    csvContent += `"Start Date:",${new Date(bucket.startDate).toLocaleDateString()}\n`;
+    csvContent += `"Contact Person:",${bucket.phoneNumber}\n`;
+    csvContent += `"Status:",${bucket.status}\n\n`;
+    
+    csvContent += `"Check Date","Checked By","Notes"\n`;
+    bucket.checks.forEach(check => {
+        csvContent += `"${new Date(check.date).toLocaleString()}","${check.checkedBy}","${check.notes}"\n`;
+    });
+    
+    downloadCsv(csvContent, `Rakleeftyd_${run.runNumber}_${bucket.size}.csv`);
 };

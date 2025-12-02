@@ -1,8 +1,9 @@
 
-import React, { useMemo } from 'react';
-import { Run, View, ApprovalDetails, SizingEntry, CartonWeightsEntry, CartonEvaluationEntry, ClassEvaluationEntry, FinalPalletQcEntry, CommodityData } from '../../types';
+
+import React, { useMemo, useState } from 'react';
+import { Run, View, ApprovalDetails, SizingEntry, CartonWeightsEntry, CartonEvaluationEntry, ClassEvaluationEntry, FinalPalletQcEntry, CommodityData, ShelfLifeBucket } from '../../types';
 import Card from '../ui/Card';
-import { exportSizingToCsv, exportCartonWeightsToCsv, exportCartonEvaluationToCsv, exportClassEvaluationToCsv, exportFinalPalletQcPhotosToZip } from '../../utils/commodityHelper';
+import { exportSizingToCsv, exportCartonWeightsToCsv, exportCartonEvaluationToCsv, exportClassEvaluationToCsv, exportFinalPalletQcPhotosToZip, exportShelfLifeToCsv } from '../../utils/commodityHelper';
 
 type QCDataEntry = SizingEntry | CartonWeightsEntry | CartonEvaluationEntry | ClassEvaluationEntry | FinalPalletQcEntry;
 
@@ -60,6 +61,46 @@ const QcCategorySummary: React.FC<QcCategorySummaryProps> = ({ title, view, entr
     );
 };
 
+const ShelfLifeSummary: React.FC<{ buckets: ShelfLifeBucket[], run: Run }> = ({ buckets, run }) => {
+    if (buckets.length === 0) return null;
+
+    return (
+        <Card className="overflow-hidden mb-6">
+            <h3 className="text-xl font-bold text-pink-400 mb-4">Rakleeftyd Records (Completed)</h3>
+            <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-slate-700">
+                    <thead className="bg-slate-700">
+                        <tr>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Details</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Completed Date</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Total Checks</th>
+                            <th className="relative px-4 py-2"><span className="sr-only">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody className="bg-slate-800 divide-y divide-slate-700">
+                        {buckets.map((bucket) => (
+                            <tr key={bucket.id}>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-300">
+                                    <span className="text-orange-400 font-medium">{bucket.size}</span> / {bucket.class} / {bucket.boxType}
+                                </td>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-300">
+                                    {bucket.completedDate ? new Date(bucket.completedDate).toLocaleDateString() : '-'}
+                                </td>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-300">
+                                    {bucket.checks.length}
+                                </td>
+                                <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                                    <button onClick={() => exportShelfLifeToCsv(bucket, run)} className="text-green-400 hover:text-green-300 font-semibold">Export CSV</button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </Card>
+    );
+};
+
 
 const RunRekordsDetailsPage: React.FC<RunRekordsDetailsPageProps> = ({ run, onViewDetails, commodityData }) => {
     
@@ -69,8 +110,9 @@ const RunRekordsDetailsPage: React.FC<RunRekordsDetailsPageProps> = ({ run, onVi
     const approvedCartonEval = useMemo(() => (run.cartonEvaluations || []).filter(e => e.approvalDetails.status === 'approved'), [run.cartonEvaluations]);
     const approvedClassEval = useMemo(() => (run.classEvaluations || []).filter(e => e.approvalDetails.status === 'approved'), [run.classEvaluations]);
     const approvedPalletQc = useMemo(() => (run.finalPalletQc || []).filter(e => e.approvalDetails.status === 'approved'), [run.finalPalletQc]);
+    const completedShelfLife = useMemo(() => (run.shelfLifeBuckets || []).filter(b => b.status === 'completed'), [run.shelfLifeBuckets]);
 
-    const hasAnyRecords = approvedSizing.length > 0 || approvedWeights.length > 0 || approvedCartonEval.length > 0 || approvedClassEval.length > 0 || approvedPalletQc.length > 0;
+    const hasAnyRecords = approvedSizing.length > 0 || approvedWeights.length > 0 || approvedCartonEval.length > 0 || approvedClassEval.length > 0 || approvedPalletQc.length > 0 || completedShelfLife.length > 0;
 
     return (
         <div className="max-w-4xl mx-auto">
@@ -125,6 +167,8 @@ const RunRekordsDetailsPage: React.FC<RunRekordsDetailsPageProps> = ({ run, onVi
                 onExport={(entry) => exportFinalPalletQcPhotosToZip(entry as FinalPalletQcEntry, run)}
                 exportLabel="Export Photos"
             />
+            
+            <ShelfLifeSummary buckets={completedShelfLife} run={run} />
         </div>
     );
 };

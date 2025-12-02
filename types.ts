@@ -15,6 +15,7 @@ export enum View {
   CLASS_EVALUATION = 'CLASS_EVALUATION',
   QUALITY_SUMMARY = 'QUALITY_SUMMARY',
   FINAL_PALLET_QC = 'FINAL_PALLET_QC',
+  SHELF_LIFE = 'SHELF_LIFE',
   ADMIN = 'ADMIN',
   ADMIN_COMMODITIES = 'ADMIN_COMMODITIES',
   ADMIN_CARTONS = 'ADMIN_CARTONS',
@@ -182,6 +183,24 @@ export interface FinalPalletQcEntry {
     approvalDetails: ApprovalDetails;
 }
 
+export interface ShelfLifeCheck {
+    date: string;
+    checkedBy: string;
+    notes?: string;
+}
+
+export interface ShelfLifeBucket {
+    id: string;
+    size: string;
+    class: string;
+    boxType: string;
+    phoneNumber: string;
+    startDate: string;
+    checks: ShelfLifeCheck[];
+    status: 'active' | 'completed';
+    completedDate?: string;
+}
+
 
 export interface Run {
   id: string;
@@ -197,6 +216,7 @@ export interface Run {
   cartonEvaluations?: CartonEvaluationEntry[];
   classEvaluations?: ClassEvaluationEntry[];
   finalPalletQc?: FinalPalletQcEntry[];
+  shelfLifeBuckets?: ShelfLifeBucket[];
 }
 
 export type ExternalQualityData = {

@@ -1,6 +1,7 @@
 
+
 import React, { useState, useEffect } from 'react';
-import { View, Run, Delivery, ExternalQualityData, DefectsData, InternalQualityData, SizingData, CommodityData, CartonConfig, CartonWeightSample, CartonEvaluationSample, FinalPalletQcData, ClassEvaluationSample, SizingEntry, CartonWeightsEntry, CartonEvaluationEntry, ClassEvaluationEntry, FinalPalletQcEntry, User, MrlRecord, RunConfig } from './types';
+import { View, Run, Delivery, ExternalQualityData, DefectsData, InternalQualityData, SizingData, CommodityData, CartonConfig, CartonWeightSample, CartonEvaluationSample, FinalPalletQcData, ClassEvaluationSample, SizingEntry, CartonWeightsEntry, CartonEvaluationEntry, ClassEvaluationEntry, FinalPalletQcEntry, User, MrlRecord, RunConfig, ShelfLifeBucket } from './types';
 import Header from './components/Header';
 import HomePage from './components/HomePage';
 import RunSetupPage from './components/RunSetupPage';
@@ -15,6 +16,7 @@ import CartonEvaluationPage from './components/qc/CartonEvaluationPage';
 import ClassEvaluationPage from './components/qc/ClassEvaluationPage';
 import QualitySummaryPage from './components/qc/QualitySummaryPage';
 import FinalPalletQcPage from './components/qc/FinalPalletQcPage';
+import ShelfLifePage from './components/qc/ShelfLifePage';
 import AdminPage from './components/AdminPage';
 import CommodityManagementPage from './components/admin/CommodityManagementPage';
 import ManageCartonsPage from './components/admin/ManageCartonsPage';
@@ -35,7 +37,7 @@ import * as supabaseStorage from './utils/supabaseStorage';
 
 const PROTECTED_VIEWS: View[] = [
     View.RUN_SETUP, View.QC_LIST, View.PLAAS_SETUP, View.ONTVANGS_QC_LIST, View.MRL, View.MRL_LIST, View.MRL_ADD, View.ADMIN, View.QUALITY_SUMMARY,
-    View.REKORDS, View.REKORDS_RUN_LIST, View.REKORDS_RUN_DETAILS, View.REKORDS_ONTVANGS_LIST
+    View.REKORDS, View.REKORDS_RUN_LIST, View.REKORDS_RUN_DETAILS, View.REKORDS_ONTVANGS_LIST, View.SHELF_LIFE
 ];
 
 const DEFAULT_RUN_CONFIG: RunConfig = {
@@ -176,7 +178,7 @@ const App: React.FC = () => {
   };
   
   const handleNavigateBack = () => {
-    const qcRunDetailViews = new Set([ View.SIZING, View.CARTON_WEIGHTS, View.CARTON_EVALUATION, View.CLASS_EVALUATION, View.FINAL_PALLET_QC ]);
+    const qcRunDetailViews = new Set([ View.SIZING, View.CARTON_WEIGHTS, View.CARTON_EVALUATION, View.CLASS_EVALUATION, View.FINAL_PALLET_QC, View.SHELF_LIFE ]);
 
     if (qcRunDetailViews.has(currentView) && isReadOnlyView) {
          setCurrentView(View.REKORDS_RUN_DETAILS); 
@@ -370,6 +372,18 @@ const App: React.FC = () => {
     const newEntry: FinalPalletQcEntry = { id: `palletqc-${Date.now()}`, timestamp: new Date().toISOString(), pallets: finalPalletQc, approvalDetails: { status: 'pending' } };
     updateRunStateAndDB(runId, r => ({ ...r, finalPalletQc: [...(r.finalPalletQc || []), newEntry] }));
   };
+  
+  const handleSaveShelfLife = async (runId: string, shelfLifeBuckets: ShelfLifeBucket[]) => {
+      // For shelf life, we replace the entire buckets array since we are modifying state inside specific buckets
+      const newRuns = runs.map(r => r.id === runId ? { ...r, shelfLifeBuckets } : r);
+      setRuns(newRuns);
+      const updatedRun = newRuns.find(r => r.id === runId);
+      if (updatedRun) {
+          setSelectedRun(updatedRun);
+          await supabaseStorage.updateRun(updatedRun);
+          alert('Shelf Life data updated.');
+      }
+  };
 
   const handleApproveQc = async (runId: string, qcType: keyof Omit<Run, 'id' | 'runNumber' | 'puc' | 'farmName' | 'boord' | 'exporter' | 'commodity' | 'variety'>, entryId: string, username: string) => {
     let updatedRunCopy: Run | null = null;
@@ -427,6 +441,8 @@ const App: React.FC = () => {
         return selectedRun ? <QualitySummaryPage run={selectedRun} onViewDetails={(view, entry) => navigateToDetail(view, true, entry, View.QUALITY_SUMMARY)} commodityData={commodityData} /> : <QcListPage runs={runs} onSelectRun={handleSelectRun} onSetupNewRun={() => handleNavigate(View.RUN_SETUP)} />;
       case View.FINAL_PALLET_QC:
         return selectedRun ? <FinalPalletQcPage run={selectedRun} onSave={handleSaveFinalPalletQc} commodityData={commodityData} cartonConfig={cartonConfig} isReadOnly={isReadOnlyView} onApprove={handleApproveQc} entryToView={entryToView} currentUser={currentUser} /> : <QcListPage runs={runs} onSelectRun={handleSelectRun} onSetupNewRun={() => handleNavigate(View.RUN_SETUP)} />;
+      case View.SHELF_LIFE:
+        return selectedRun ? <ShelfLifePage run={selectedRun} onSave={handleSaveShelfLife} commodityData={commodityData} cartonConfig={cartonConfig} currentUser={currentUser} /> : <QcListPage runs={runs} onSelectRun={handleSelectRun} onSetupNewRun={() => handleNavigate(View.RUN_SETUP)} />;
       case View.ADMIN:
         return <AdminPage onNavigate={handleNavigate} currentUser={currentUser} />;
       case View.ADMIN_COMMODITIES:
