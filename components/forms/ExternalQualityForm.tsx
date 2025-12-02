@@ -52,16 +52,13 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
         setSizes(getSizesForCommodity(delivery.commodity, commodityData));
     }, [delivery.commodity, commodityData]);
 
-    const handleQualityChange = (className: string, sizeCode: string, value: string) => {
+    const handleQualityChange = (className: string, value: string) => {
         const numValue = value === '' ? '' : parseInt(value, 10);
         if (typeof numValue === 'number' && isNaN(numValue)) return;
 
         setQualityData(prev => ({
             ...prev,
-            [className]: {
-                ...prev[className],
-                [sizeCode]: numValue,
-            },
+            [className]: numValue,
         }));
     };
     
@@ -116,7 +113,6 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
 
     const totalFruitCount = useMemo(() => {
         return Object.values(qualityData)
-            .flatMap(sizeCounts => Object.values(sizeCounts))
             .reduce<number>((total, count) => total + (Number(count) || 0), 0);
     }, [qualityData]);
     
@@ -227,46 +223,44 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
 
             <Card>
                 <h3 className="text-2xl font-bold text-green-400 mb-1">Eksterne kwaliteit</h3>
-                 <p className="text-slate-400 mb-6">Voer die aantal vrugte vir elke grootte en klas in (Teiken: {SAMPLE_TARGET} vrugte).</p>
-                <div className="overflow-x-auto">
+                 <p className="text-slate-400 mb-6">Voer die aantal vrugte vir elke klas in (Teiken: {SAMPLE_TARGET} vrugte).</p>
+                <div className="overflow-x-auto max-w-2xl">
                     <table className="min-w-full divide-y divide-slate-600 border border-slate-600 rounded-lg">
                         <thead className="bg-slate-700">
                             <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Klas / Grootte</th>
-                                {sizes.map(size => <th key={size.code} className="px-4 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">{size.code}</th>)}
+                                <th className="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider w-1/2">Klas</th>
+                                <th className="px-4 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider w-1/2">Aantal</th>
                             </tr>
                         </thead>
                         <tbody className="bg-slate-800 divide-y divide-slate-600">
-                            {QUALITY_CLASSES.map(className => (
-                                <tr key={className}>
-                                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-slate-100">{className}</td>
-                                    {sizes.map(size => {
-                                        const countValue = Number(qualityData[className]?.[size.code]) || 0;
-                                        const percentageText = totalFruitCount > 0 ? ((countValue / totalFruitCount) * 100).toFixed(1) : '0.0';
-                                        return (
-                                            <td key={size.code} className="px-2 py-2 whitespace-nowrap text-sm text-slate-400">
-                                                <div className="flex items-center space-x-2">
-                                                    <Input 
-                                                        type="number" 
-                                                        min="0"
-                                                        value={qualityData[className]?.[size.code] || ''}
-                                                        onChange={(e) => handleQualityChange(className, size.code, e.target.value)}
-                                                        className="w-20 text-center !text-black font-semibold px-1 py-2 !bg-white"
-                                                        placeholder="0"
-                                                    />
-                                                    <span className="text-xs text-slate-500 w-10 text-right">
-                                                        ({percentageText}%)
-                                                    </span>
-                                                </div>
-                                            </td>
-                                        )
-                                    })}
-                                </tr>
-                            ))}
+                            {QUALITY_CLASSES.map(className => {
+                                const countValue = Number(qualityData[className]) || 0;
+                                const percentageText = totalFruitCount > 0 ? ((countValue / totalFruitCount) * 100).toFixed(1) : '0.0';
+                                return (
+                                    <tr key={className}>
+                                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-slate-100">{className}</td>
+                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-slate-400 text-center">
+                                            <div className="flex items-center justify-center space-x-2">
+                                                <Input 
+                                                    type="number" 
+                                                    min="0"
+                                                    value={qualityData[className] || ''}
+                                                    onChange={(e) => handleQualityChange(className, e.target.value)}
+                                                    className="w-24 text-center !text-black font-semibold px-2 py-2 !bg-white"
+                                                    placeholder="0"
+                                                />
+                                                <span className="text-xs text-slate-500 w-12 text-left">
+                                                    ({percentageText}%)
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )
+                            })}
                         </tbody>
                         <tfoot className="bg-slate-700">
                             <tr>
-                                <td colSpan={sizes.length + 1} className="px-4 py-3 text-right">
+                                <td colSpan={2} className="px-4 py-3 text-right">
                                     <p className={`text-lg font-bold ${totalFruitCount === SAMPLE_TARGET ? 'text-green-500' : 'text-slate-200'}`}>
                                         Totaal: {totalFruitCount} / {SAMPLE_TARGET}
                                     </p>

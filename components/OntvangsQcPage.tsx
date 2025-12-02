@@ -111,12 +111,13 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
     csvContent += `"Totaal",${aantalRow}\n\n`;
 
     csvContent += "Eksterne kwaliteit\n";
-    csvContent += `"Klas / Grootte",${sizeHeaders}\n`;
+    csvContent += `"Klas","Aantal"\n`;
     QUALITY_CLASSES.forEach(className => {
-        const row = sizes.map((size: Size) => qualityData?.[className]?.[size.code] || 0).join(',');
-        csvContent += `"${className}",${row}\n`;
+        const count = qualityData?.[className] || 0;
+        csvContent += `"${className}",${count}\n`;
     });
     csvContent += "\n";
+
     csvContent += "Defekte gekry\n";
     csvContent += `"Defek / Grootte",${sizeHeaders}\n`;
     

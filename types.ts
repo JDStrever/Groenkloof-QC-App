@@ -192,9 +192,7 @@ export interface Run {
 }
 
 export type ExternalQualityData = {
-  [className: string]: {
-    [sizeCode: string]: number | '';
-  };
+  [className: string]: number | '';
 };
 
 export type DefectsData = {
