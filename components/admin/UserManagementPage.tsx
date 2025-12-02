@@ -19,7 +19,13 @@ const PERMISSION_VIEWS: { key: View; label: string }[] = [
     { key: View.PLAAS_SETUP, label: 'Plaas Setup' },
     { key: View.ONTVANGS_QC_LIST, label: 'Ontvangs QC' },
     { key: View.MRL, label: 'MRL\'e' },
-    { key: View.ADMIN, label: 'Admin Panel (Full Access)' },
+    { key: View.REKORDS, label: 'Rekords' },
+    { key: View.ADMIN, label: 'Admin - Full Access' },
+    { key: View.ADMIN_COMMODITIES, label: 'Admin - Manage Commodities' },
+    { key: View.ADMIN_CARTONS, label: 'Admin - Manage Kartonne' },
+    { key: View.ADMIN_RUN_INFO, label: 'Admin - Manage Run Info' },
+    { key: View.ADMIN_USERS, label: 'Admin - Manage Users' },
+    { key: View.ADMIN_DATA, label: 'Admin - Manage Data (Edit/Delete)' },
 ];
 
 const UserManagementPage: React.FC<UserManagementPageProps> = ({ users, onUpdateUsers }) => {

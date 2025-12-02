@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Delivery } from '../types';
 import Button from './ui/Button';
 import Card from './ui/Card';
@@ -8,9 +8,11 @@ import Label from './ui/Label';
 
 interface PlaasSetupPageProps {
   onDeliveryCreated: (newDelivery: Omit<Delivery, 'id'>) => void;
+  onDeliveryUpdated?: (updatedDelivery: Delivery) => void;
+  initialDelivery?: Delivery | null;
 }
 
-const PlaasSetupPage: React.FC<PlaasSetupPageProps> = ({ onDeliveryCreated }) => {
+const PlaasSetupPage: React.FC<PlaasSetupPageProps> = ({ onDeliveryCreated, onDeliveryUpdated, initialDelivery }) => {
   const [formData, setFormData] = useState({
     deliveryNote: '',
     dateReceived: '',
@@ -22,6 +24,21 @@ const PlaasSetupPage: React.FC<PlaasSetupPageProps> = ({ onDeliveryCreated }) =>
     variety: '',
   });
 
+  useEffect(() => {
+    if (initialDelivery) {
+        setFormData({
+            deliveryNote: initialDelivery.deliveryNote,
+            dateReceived: initialDelivery.dateReceived,
+            puc: initialDelivery.puc,
+            farmName: initialDelivery.farmName,
+            boord: initialDelivery.boord,
+            exporter: initialDelivery.exporter,
+            commodity: initialDelivery.commodity,
+            variety: initialDelivery.variety,
+        });
+    }
+  }, [initialDelivery]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -30,7 +47,11 @@ const PlaasSetupPage: React.FC<PlaasSetupPageProps> = ({ onDeliveryCreated }) =>
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (Object.values(formData).every(field => typeof field === 'string' && field.trim() !== '')) {
-      onDeliveryCreated(formData);
+      if (initialDelivery && onDeliveryUpdated) {
+          onDeliveryUpdated({ ...initialDelivery, ...formData });
+      } else {
+          onDeliveryCreated(formData);
+      }
     } else {
       alert('Please fill out all fields.');
     }
@@ -40,44 +61,44 @@ const PlaasSetupPage: React.FC<PlaasSetupPageProps> = ({ onDeliveryCreated }) =>
     <div className="max-w-2xl mx-auto">
       <Card>
         <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-green-400">Setup New Delivery</h2>
-            <p className="text-slate-400 mt-2">Enter the details for the new fruit delivery.</p>
+            <h2 className="text-3xl font-bold text-green-400">{initialDelivery ? 'Edit Delivery' : 'Setup New Delivery'}</h2>
+            <p className="text-slate-400 mt-2">{initialDelivery ? 'Update the details for this delivery.' : 'Enter the details for the new fruit delivery.'}</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <Label htmlFor="deliveryNote">Delivery Note</Label>
-            <Input id="deliveryNote" name="deliveryNote" value={formData.deliveryNote} onChange={handleChange} placeholder="e.g., DN-54321" required />
+            <Input id="deliveryNote" name="deliveryNote" value={formData.deliveryNote} onChange={handleChange} placeholder="e.g., DN-54321" required className="!bg-white !text-black" />
           </div>
           <div>
             <Label htmlFor="dateReceived">Date Received</Label>
-            <Input id="dateReceived" name="dateReceived" type="date" value={formData.dateReceived} onChange={handleChange} required />
+            <Input id="dateReceived" name="dateReceived" type="date" value={formData.dateReceived} onChange={handleChange} required className="!bg-white !text-black" />
           </div>
           <div>
             <Label htmlFor="puc">PUC</Label>
-            <Input id="puc" name="puc" value={formData.puc} onChange={handleChange} placeholder="e.g., 100256" required />
+            <Input id="puc" name="puc" value={formData.puc} onChange={handleChange} placeholder="e.g., 100256" required className="!bg-white !text-black" />
           </div>
           <div>
             <Label htmlFor="farmName">Farm Name</Label>
-            <Input id="farmName" name="farmName" value={formData.farmName} onChange={handleChange} placeholder="e.g., Sunnyvale Orchards" required />
+            <Input id="farmName" name="farmName" value={formData.farmName} onChange={handleChange} placeholder="e.g., Sunnyvale Orchards" required className="!bg-white !text-black" />
           </div>
           <div>
             <Label htmlFor="boord">Boord</Label>
-            <Input id="boord" name="boord" value={formData.boord} onChange={handleChange} placeholder="e.g., Block A" required />
+            <Input id="boord" name="boord" value={formData.boord} onChange={handleChange} placeholder="e.g., Block A" required className="!bg-white !text-black" />
           </div>
           <div>
             <Label htmlFor="exporter">Exporter</Label>
-            <Input id="exporter" name="exporter" value={formData.exporter} onChange={handleChange} placeholder="e.g., Citrus World Inc." required />
+            <Input id="exporter" name="exporter" value={formData.exporter} onChange={handleChange} placeholder="e.g., Citrus World Inc." required className="!bg-white !text-black" />
           </div>
           <div>
             <Label htmlFor="commodity">Commodity</Label>
-            <Input id="commodity" name="commodity" value={formData.commodity} onChange={handleChange} placeholder="e.g., Orange" required />
+            <Input id="commodity" name="commodity" value={formData.commodity} onChange={handleChange} placeholder="e.g., Orange" required className="!bg-white !text-black" />
           </div>
           <div>
             <Label htmlFor="variety">Variety</Label>
-            <Input id="variety" name="variety" value={formData.variety} onChange={handleChange} placeholder="e.g., Valencia" required />
+            <Input id="variety" name="variety" value={formData.variety} onChange={handleChange} placeholder="e.g., Valencia" required className="!bg-white !text-black" />
           </div>
           <div className="pt-4">
-            <Button type="submit" className="w-full">Create Delivery</Button>
+            <Button type="submit" className="w-full">{initialDelivery ? 'Update Delivery' : 'Create Delivery'}</Button>
           </div>
         </form>
       </Card>

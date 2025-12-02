@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Run, RunConfig, CommodityData } from '../types';
 import Button from './ui/Button';
 import Card from './ui/Card';
@@ -8,11 +8,13 @@ import Label from './ui/Label';
 
 interface RunSetupPageProps {
   onRunCreated: (newRun: Omit<Run, 'id'>) => void;
+  onRunUpdated?: (updatedRun: Run) => void;
   runConfig: RunConfig;
   commodityData: CommodityData;
+  initialRun?: Run | null;
 }
 
-const RunSetupPage: React.FC<RunSetupPageProps> = ({ onRunCreated, runConfig, commodityData }) => {
+const RunSetupPage: React.FC<RunSetupPageProps> = ({ onRunCreated, onRunUpdated, runConfig, commodityData, initialRun }) => {
   const [formData, setFormData] = useState({
     runNumber: '',
     puc: '',
@@ -23,6 +25,20 @@ const RunSetupPage: React.FC<RunSetupPageProps> = ({ onRunCreated, runConfig, co
     variety: '',
   });
 
+  useEffect(() => {
+    if (initialRun) {
+        setFormData({
+            runNumber: initialRun.runNumber,
+            puc: initialRun.puc,
+            farmName: initialRun.farmName,
+            boord: initialRun.boord,
+            exporter: initialRun.exporter,
+            commodity: initialRun.commodity,
+            variety: initialRun.variety,
+        });
+    }
+  }, [initialRun]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -30,9 +46,12 @@ const RunSetupPage: React.FC<RunSetupPageProps> = ({ onRunCreated, runConfig, co
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // FIX: Add type guard to ensure field is a string before calling trim().
     if (Object.values(formData).every(field => typeof field === 'string' && field.trim() !== '')) {
-      onRunCreated(formData);
+      if (initialRun && onRunUpdated) {
+          onRunUpdated({ ...initialRun, ...formData });
+      } else {
+          onRunCreated(formData);
+      }
     } else {
       alert('Please fill out all fields.');
     }
@@ -42,13 +61,13 @@ const RunSetupPage: React.FC<RunSetupPageProps> = ({ onRunCreated, runConfig, co
     <div className="max-w-2xl mx-auto">
       <Card>
         <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-green-400">Setup New Run</h2>
-            <p className="text-slate-400 mt-2">Enter the details for the new production run.</p>
+            <h2 className="text-3xl font-bold text-green-400">{initialRun ? 'Edit Run Details' : 'Setup New Run'}</h2>
+            <p className="text-slate-400 mt-2">{initialRun ? 'Update the details for this run.' : 'Enter the details for the new production run.'}</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <Label htmlFor="runNumber">Run Number</Label>
-            <Input id="runNumber" name="runNumber" value={formData.runNumber} onChange={handleChange} placeholder="e.g., R12345" required />
+            <Input id="runNumber" name="runNumber" value={formData.runNumber} onChange={handleChange} placeholder="e.g., R12345" required className="!bg-white !text-black" />
           </div>
           
           <div>
@@ -142,7 +161,7 @@ const RunSetupPage: React.FC<RunSetupPageProps> = ({ onRunCreated, runConfig, co
           </div>
 
           <div className="pt-4">
-            <Button type="submit" className="w-full">Create Run</Button>
+            <Button type="submit" className="w-full">{initialRun ? 'Update Run' : 'Create Run'}</Button>
           </div>
         </form>
       </Card>

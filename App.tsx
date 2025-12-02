@@ -24,6 +24,7 @@ import { DEFAULT_CARTON_CONFIG } from './constants/cartonConfig';
 import MrlPage from './components/MrlPage';
 import LoginPage from './components/LoginPage';
 import UserManagementPage from './components/admin/UserManagementPage';
+import ManageDataPage from './components/admin/ManageDataPage';
 import AddMrlPage from './components/mrl/AddMrlPage';
 import MrlListPage from './components/mrl/MrlListPage';
 import RekordsPage from './components/RekordsPage';
@@ -64,6 +65,7 @@ const App: React.FC = () => {
   const [runConfig, setRunConfig] = useState<RunConfig>(DEFAULT_RUN_CONFIG);
   const [isReadOnlyView, setIsReadOnlyView] = useState(false);
   const [entryToView, setEntryToView] = useState<any>(null);
+  const [entryToEdit, setEntryToEdit] = useState<any>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
 
@@ -154,10 +156,9 @@ const App: React.FC = () => {
         return;
     }
 
-    if (currentUser && isProtected && !currentUser.permissions.includes(view) && !currentUser.permissions.includes(View.ADMIN)) {
-        // Special case: If user has ADMIN permission, they have access to everything.
-        // We also check specifically for REKORDS permission if we want granularity there, but for now assuming permissions map 1:1 with view
-        // Logic handled by the condition above (includes View.ADMIN)
+    // Reset edit state when navigating
+    if (view !== View.RUN_SETUP && view !== View.PLAAS_SETUP) {
+        setEntryToEdit(null);
     }
     
     if (readOnly) setEntryToView(entry);
@@ -171,74 +172,20 @@ const App: React.FC = () => {
     setCurrentView(View.HOME);
     setSelectedRun(null);
     setSelectedDelivery(null);
+    setEntryToEdit(null);
   };
   
   const handleNavigateBack = () => {
     const qcRunDetailViews = new Set([ View.SIZING, View.CARTON_WEIGHTS, View.CARTON_EVALUATION, View.CLASS_EVALUATION, View.FINAL_PALLET_QC ]);
 
     if (qcRunDetailViews.has(currentView) && isReadOnlyView) {
-        // If we are in read-only mode, we check where we came from.
-        // If we came from Quality Summary (Active Run) -> Go back to Quality Summary
-        // If we came from Rekords Run Details -> Go back to Rekords Run Details
-        if (selectedRun && !runs.includes(selectedRun)) { 
-            // This is a bit tricky since selectedRun is state.
-            // Simplified: If we are in Rekords context, go back to Rekords Details.
-            // We can infer context if we have a way, or just assume selectedRun is set.
-            // Let's assume if we are viewing readOnly and selectedRun is set, we go back to the summary view.
-            // But we need to distinguish between 'Quality Summary' and 'Run Rekords Details'.
-            // For now, let's look at previous flow.
-            // If the user was in REKORDS_RUN_DETAILS, they would have been passed here.
-            // We can default to going back to REKORDS_RUN_DETAILS if that's where we are logically.
-            // However, handleNavigate sets currentView.
-            // Let's rely on checking if the user was "in records mode".
-            // A simple heuristic: if we are read-only, check if we were "viewing records" logic.
-            // Actually, we can check the previous view if we stored it, or just use `currentView` mappings.
-            // Best approach here: If readOnly is true, we simply go back to the appropriate summary page.
-            // Since we use the same `SizingPage` for both active QC summary and archived records, we need to know which "parent" to go back to.
-            // We can't easily know without history. 
-            // FIX: We will default to Quality Summary if not in Rekords, but if we are in Rekords flow...
-            // Let's add a state to track "context" or check `selectedRun` status?
-            // Actually, simpler: We can just check if we are in a read-only flow initiated from Rekords.
-            // Let's fallback: always go to REKORDS_RUN_DETAILS if we are in readOnly AND we were exploring a record.
-            // But we might be in Quality Summary read-only (approving).
-            // Let's try to detect if we are in "Rekords" mode.
-            // For now, let's map based on where we are likely to be.
-            // If we are readOnly, we go back to the Summary page.
-            // If the user clicked from Rekords, we want to go to REKORDS_RUN_DETAILS.
-            // If the user clicked from Quality Summary, we want to go to QUALITY_SUMMARY.
-            // Since we don't have a navigation stack, we might have a slight issue here.
-            // Quick fix: Check if we are "in records". We can infer this if we have a state, or just handle it loosely.
-            // Better fix: Add `returnView` state to `handleNavigate` logic? Too complex for this prompt.
-            // Alternative: If `isReadOnlyView` is true, we just go back to `REKORDS_RUN_DETAILS` IF we are not in the "active run" flow.
-            // Let's try: If selectedRun exists, check if we are in REKORDS view group?
-            // Let's just go back to REKORDS_RUN_DETAILS if we are read-only. Wait, Approval is also read-only.
-            // Let's split the logic based on an assumption or a new state.
-            // Let's assume if we are in `REKORDS_...` we go back up the chain.
-            // If we are in `SIZING` (read-only), we go back to `REKORDS_RUN_DETAILS`.
-            // BUT `QualitySummaryPage` also uses `readOnly`.
-            // Solution: We will check `currentView` in the generic handler below.
-             setCurrentView(View.REKORDS_RUN_DETAILS); // Defaulting to Rekords Details for now if read-only. 
-             // If this breaks "Quality Summary" approval flow back button, we might need a fix.
-             // Actually, `handleApproveQc` uses `handleNavigate(View.QUALITY_SUMMARY, false)`. 
-             // Viewing details from Quality Summary sets `readOnly=true`.
-             // If we are approving, we are in Quality Summary.
-             // If we view details from Quality Summary, we want to go back to Quality Summary.
-             // If we view details from Rekords, we want to go back to Rekords Details.
-             // Simple hack: We can check if `entryToView` is populated? Both use it.
-             // We will introduce a simple check: if the previous view was stored, or just check if `selectedRun` is being actively edited?
-             // Let's just use `View.QUALITY_SUMMARY` if we are not in `REKORDS` mode.
-             // We can check if `currentView` is `REKORDS_RUN_DETAILS`? No, we are in `SIZING`.
-             // Let's leave this for now and handle specific Rekord views below.
-        } else {
-             // Default back logic
-             handleNavigateHome(); 
-        }
+         setCurrentView(View.REKORDS_RUN_DETAILS); 
     } 
     else if (currentView === View.QUALITY_SUMMARY) handleNavigate(View.QC_RUN, false);
     else if (qcRunDetailViews.has(currentView) && !isReadOnlyView) setCurrentView(View.QC_RUN);
     else if (currentView === View.QC_RUN) { setSelectedRun(null); setCurrentView(View.QC_LIST); }
     else if (currentView === View.ONTVANGS_QC) { setSelectedDelivery(null); setCurrentView(View.ONTVANGS_QC_LIST); }
-    else if (currentView === View.ADMIN_COMMODITIES || currentView === View.ADMIN_CARTONS || currentView === View.ADMIN_USERS || currentView === View.ADMIN_RUN_INFO) setCurrentView(View.ADMIN);
+    else if (currentView === View.ADMIN_COMMODITIES || currentView === View.ADMIN_CARTONS || currentView === View.ADMIN_USERS || currentView === View.ADMIN_RUN_INFO || currentView === View.ADMIN_DATA) setCurrentView(View.ADMIN);
     else if (currentView === View.MRL_ADD || currentView === View.MRL_LIST) setCurrentView(View.MRL);
     // Rekords Navigation
     else if (currentView === View.REKORDS_RUN_LIST || currentView === View.REKORDS_ONTVANGS_LIST) setCurrentView(View.REKORDS);
@@ -249,41 +196,9 @@ const App: React.FC = () => {
   // Custom back handler for Sizing/etc pages when they are used in different contexts
   const handleDetailBack = () => {
        if (isReadOnlyView) {
-           // We need to guess context.
-           // If we are in Rekords context, we likely came from REKORDS_RUN_DETAILS.
-           // If we are in Active QC context, we came from QUALITY_SUMMARY.
-           // We can't know for sure without a stack.
-           // However, standard flow: 
-           // 1. Rekords -> Run List -> Run Details -> Sizing (ReadOnly)
-           // 2. QC Run -> Quality Summary -> Sizing (ReadOnly)
-           // Let's assume if we are read-only, we try to go back to the "Summary" view.
-           // We can check if we have a "Rekords" view active? No.
-           // Let's just use a simple state toggle if we really need to, but for now:
-           // If `selectedRun` matches a run in `runs` list, it might be active.
-           // But `runs` contains all runs.
-           // Let's just go to `REKORDS_RUN_DETAILS` if the view was pushed from there. 
-           // Since we don't have that info, let's just create a `backView` state.
            if (entryToView) {
-               // If we have an entry, we are looking at details. 
-               // Let's toggle between Quality Summary and Rekords details based on where we are *conceptually*.
-               // A quick hack: Check if we are in "Rekords" flow.
-               // We will assume that if `currentView` is SIZING/etc and `isReadOnlyView` is true...
-               // We can't easily distinguish.
-               // Let's just default to `QUALITY_SUMMARY` because that is the 'active' flow.
-               // If user is in Rekords, they might be annoyed.
-               // Better: Add a `previousView` to `handleNavigate`.
-               // Since I can't easily refactor everything for `previousView` in this prompt without changing too many files...
-               // I will check `selectedRun`? No.
-               // I will just modify `handleNavigateBack` logic inside `App` specifically for the `isReadOnly` check above to rely on a variable I can set.
-               // But for this specific requirement, I will just direct ReadOnly back to REKORDS_RUN_DETAILS if we are "deep" in records.
-               // Actually, `handleNavigateBack` is passed to Header.
-               // Let's use `setCurrentView(View.REKORDS_RUN_DETAILS)` if we are coming from records pages.
-               // But `SizingPage` is generic.
-               // Oky, simpler:
-               // If I am in `REKORDS_RUN_DETAILS` and click view, `currentView` becomes `SIZING`.
-               // I will add a piece of state `returnView` to App.
            }
-           setCurrentView(returnView); // Uses the state defined below
+           setCurrentView(returnView); 
        } else {
            setCurrentView(View.QC_RUN);
        }
@@ -322,11 +237,41 @@ const App: React.FC = () => {
     await supabaseStorage.createRun(newRun);
   };
 
+  const handleRunUpdated = async (updatedRun: Run) => {
+      setRuns(prev => prev.map(r => r.id === updatedRun.id ? updatedRun : r));
+      setCurrentView(View.ADMIN_DATA);
+      setEntryToEdit(null);
+      await supabaseStorage.updateRun(updatedRun);
+      alert('Run updated successfully!');
+  };
+
+  const handleDeleteRun = async (runId: string) => {
+      if (window.confirm('Are you sure you want to delete this run and all its QC data? This cannot be undone.')) {
+          setRuns(prev => prev.filter(r => r.id !== runId));
+          await supabaseStorage.deleteRun(runId);
+      }
+  };
+
   const handleDeliveryCreated = async (newDeliveryData: Omit<Delivery, 'id'>) => {
     const newDelivery: Delivery = { ...newDeliveryData, id: `delivery-${Date.now()}` };
     setDeliveries(prev => [newDelivery, ...prev]);
     setCurrentView(View.ONTVANGS_QC_LIST);
     await supabaseStorage.createDelivery(newDelivery);
+  };
+
+  const handleDeliveryUpdated = async (updatedDelivery: Delivery) => {
+    setDeliveries(prev => prev.map(d => d.id === updatedDelivery.id ? updatedDelivery : d));
+    setCurrentView(View.ADMIN_DATA);
+    setEntryToEdit(null);
+    await supabaseStorage.updateDelivery(updatedDelivery);
+    alert('Delivery updated successfully!');
+  };
+
+  const handleDeleteDelivery = async (deliveryId: string) => {
+    if (window.confirm('Are you sure you want to delete this delivery? This cannot be undone.')) {
+        setDeliveries(prev => prev.filter(d => d.id !== deliveryId));
+        await supabaseStorage.deleteDelivery(deliveryId);
+    }
   };
 
   const handleMrlRecordCreated = async (newRecordData: Omit<MrlRecord, 'id'>) => {
@@ -354,13 +299,19 @@ const App: React.FC = () => {
 
   const handleSelectRekordDelivery = (delivery: Delivery) => {
       setSelectedDelivery(delivery);
-      // We reuse the ONTVANGS_QC view but passing a prop (handled via rendering logic)
-      // Actually we will use a separate view logic or just pass readOnly
-      // We will reuse the View.ONTVANGS_QC but with readOnly flag implicitly if navigated via Rekords?
-      // No, let's use a specific state or just reuse the component in render.
-      // Let's use `readOnly` boolean in handleNavigate.
       setReturnView(View.REKORDS_ONTVANGS_LIST);
       handleNavigate(View.ONTVANGS_QC, true); // readOnly = true
+  };
+
+  // Edit Handlers for Admin
+  const handleEditRun = (run: Run) => {
+      setEntryToEdit(run);
+      setCurrentView(View.RUN_SETUP);
+  };
+
+  const handleEditDelivery = (delivery: Delivery) => {
+      setEntryToEdit(delivery);
+      setCurrentView(View.PLAAS_SETUP);
   };
 
   const handleSaveInspection = async (deliveryId: string, qualityData: ExternalQualityData, defectsData: DefectsData, internalQualityData: InternalQualityData, photos: string[], sizeCounts: { [sizeCode: string]: number | '' }) => {
@@ -453,13 +404,13 @@ const App: React.FC = () => {
 
     switch (currentView) {
       case View.RUN_SETUP:
-        return <RunSetupPage onRunCreated={handleRunCreated} runConfig={runConfig} commodityData={commodityData} />;
+        return <RunSetupPage onRunCreated={handleRunCreated} onRunUpdated={handleRunUpdated} runConfig={runConfig} commodityData={commodityData} initialRun={entryToEdit} />;
       case View.QC_LIST:
         return <QcListPage runs={runs} onSelectRun={handleSelectRun} onSetupNewRun={() => handleNavigate(View.RUN_SETUP)} />;
       case View.QC_RUN:
         return selectedRun ? <QcRunPage run={selectedRun} onNavigate={(view) => handleNavigate(view, false)} /> : <QcListPage runs={runs} onSelectRun={handleSelectRun} onSetupNewRun={() => handleNavigate(View.RUN_SETUP)} />;
       case View.PLAAS_SETUP:
-        return <PlaasSetupPage onDeliveryCreated={handleDeliveryCreated} />;
+        return <PlaasSetupPage onDeliveryCreated={handleDeliveryCreated} onDeliveryUpdated={handleDeliveryUpdated} initialDelivery={entryToEdit} />;
       case View.ONTVANGS_QC_LIST:
           return <OntvangsQcListPage deliveries={deliveries} onSelectDelivery={handleSelectDelivery} onSetupNewDelivery={() => handleNavigate(View.PLAAS_SETUP)} />;
       case View.ONTVANGS_QC:
@@ -477,7 +428,7 @@ const App: React.FC = () => {
       case View.FINAL_PALLET_QC:
         return selectedRun ? <FinalPalletQcPage run={selectedRun} onSave={handleSaveFinalPalletQc} commodityData={commodityData} cartonConfig={cartonConfig} isReadOnly={isReadOnlyView} onApprove={handleApproveQc} entryToView={entryToView} currentUser={currentUser} /> : <QcListPage runs={runs} onSelectRun={handleSelectRun} onSetupNewRun={() => handleNavigate(View.RUN_SETUP)} />;
       case View.ADMIN:
-        return <AdminPage onNavigate={handleNavigate} />;
+        return <AdminPage onNavigate={handleNavigate} currentUser={currentUser} />;
       case View.ADMIN_COMMODITIES:
         return <CommodityManagementPage initialCommodityData={commodityData} onUpdate={handleCommodityDataUpdate} />;
       case View.ADMIN_CARTONS:
@@ -486,6 +437,8 @@ const App: React.FC = () => {
         return <UserManagementPage users={users} onUpdateUsers={handleUsersUpdate} />;
       case View.ADMIN_RUN_INFO:
         return <ManageRunInfoPage runConfig={runConfig} onUpdate={handleRunConfigUpdate} />;
+      case View.ADMIN_DATA:
+        return <ManageDataPage runs={runs} deliveries={deliveries} onEditRun={handleEditRun} onDeleteRun={handleDeleteRun} onEditDelivery={handleEditDelivery} onDeleteDelivery={handleDeleteDelivery} />;
       case View.MRL:
         return <MrlPage onNavigate={handleNavigate} />;
       case View.MRL_ADD:
@@ -514,11 +467,6 @@ const App: React.FC = () => {
       if (isReadOnlyView && entryToView) {
           setCurrentView(returnView);
           setEntryToView(null);
-          // Don't turn off readOnly here immediately as the return view might be read-only (like Rekords Run Details)
-          // Actually, Rekords Run Details is not strictly "readOnly" mode in the sense of the form components,
-          // but it is a "view" page. 
-          // If we return to QUALITY_SUMMARY, we are not in readOnly form mode.
-          // If we return to REKORDS_RUN_DETAILS, we are just in a listing page.
           setIsReadOnlyView(false); 
       } else {
           handleNavigateBack();

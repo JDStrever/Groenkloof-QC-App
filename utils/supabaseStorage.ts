@@ -45,7 +45,15 @@ export const createRun = async (run: Run) => {
 };
 
 export const updateRun = async (run: Run) => {
+    // We update everything including metadata in case of edits
     const { error } = await supabase.from('frutia_runs').update({
+        run_number: run.runNumber,
+        puc: run.puc,
+        farm_name: run.farmName,
+        boord: run.boord,
+        exporter: run.exporter,
+        commodity: run.commodity,
+        variety: run.variety,
         sizing_data: run.sizingData,
         carton_weights: run.cartonWeights,
         carton_evaluations: run.cartonEvaluations,
@@ -53,6 +61,11 @@ export const updateRun = async (run: Run) => {
         final_pallet_qc: run.finalPalletQc
     }).eq('id', run.id);
     if (error) console.error('Error updating run:', error);
+};
+
+export const deleteRun = async (runId: string) => {
+    const { error } = await supabase.from('frutia_runs').delete().eq('id', runId);
+    if (error) console.error('Error deleting run:', error);
 };
 
 // --- Deliveries ---
@@ -75,13 +88,6 @@ export const fetchDeliveries = async (): Promise<Delivery[]> => {
         externalQuality: row.external_quality,
         defects: row.defects,
         internalQuality: row.internal_quality,
-        // Assuming database has been migrated or will be flexible with JSONB, 
-        // we can store sizeCounts in a new column or merge it into an existing one.
-        // For now, let's assume we might need to add it to schema or store it in metadata.
-        // If 'size_counts' column doesn't exist, this might fail unless we update schema.
-        // However, since we are using 'external_quality' jsonb, we could potentially nest it there if we wanted,
-        // but 'sizeCounts' is a root level property in the Typescript interface.
-        // Let's assume we map it to a 'size_counts' jsonb column.
         sizeCounts: row.size_counts || {},
         photos: row.photos
     }));
@@ -102,22 +108,36 @@ export const createDelivery = async (delivery: Delivery) => {
         external_quality: delivery.externalQuality,
         defects: delivery.defects,
         internal_quality: delivery.internalQuality,
-        size_counts: delivery.sizeCounts, // Needs column in DB
+        size_counts: delivery.sizeCounts,
         photos: delivery.photos
     });
     if (error) console.error('Error creating delivery:', error);
 };
 
 export const updateDelivery = async (delivery: Delivery) => {
+    // Update metadata and QC data
     const { error } = await supabase.from('frutia_deliveries').update({
+        delivery_note: delivery.deliveryNote,
+        date_received: delivery.dateReceived,
+        puc: delivery.puc,
+        farm_name: delivery.farmName,
+        boord: delivery.boord,
+        exporter: delivery.exporter,
+        commodity: delivery.commodity,
+        variety: delivery.variety,
         external_quality: delivery.externalQuality,
         defects: delivery.defects,
         internal_quality: delivery.internalQuality,
-        size_counts: delivery.sizeCounts, // Needs column in DB
+        size_counts: delivery.sizeCounts,
         photos: delivery.photos,
         inspection_completed_date: delivery.inspectionCompletedDate
     }).eq('id', delivery.id);
     if (error) console.error('Error updating delivery:', error);
+};
+
+export const deleteDelivery = async (deliveryId: string) => {
+    const { error } = await supabase.from('frutia_deliveries').delete().eq('id', deliveryId);
+    if (error) console.error('Error deleting delivery:', error);
 };
 
 // --- MRLs ---
