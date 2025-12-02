@@ -231,6 +231,7 @@ export interface Delivery {
   externalQuality?: ExternalQualityData;
   defects?: DefectsData;
   internalQuality?: InternalQualityData;
+  sizeCounts?: { [sizeCode: string]: number | '' };
   inspectionCompletedDate?: string;
   photos?: string[];
 }

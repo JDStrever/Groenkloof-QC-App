@@ -229,9 +229,17 @@ const App: React.FC = () => {
     setCurrentView(View.ONTVANGS_QC);
   };
 
-  const handleSaveInspection = async (deliveryId: string, qualityData: ExternalQualityData, defectsData: DefectsData, internalQualityData: InternalQualityData, photos: string[]) => {
+  const handleSaveInspection = async (deliveryId: string, qualityData: ExternalQualityData, defectsData: DefectsData, internalQualityData: InternalQualityData, photos: string[], sizeCounts: { [sizeCode: string]: number | '' }) => {
     const newDeliveries = deliveries.map(d => 
-      d.id === deliveryId ? { ...d, externalQuality: qualityData, defects: defectsData, internalQuality: internalQualityData, photos: photos, inspectionCompletedDate: new Date().toISOString().split('T')[0] } : d
+      d.id === deliveryId ? { 
+          ...d, 
+          externalQuality: qualityData, 
+          defects: defectsData, 
+          internalQuality: internalQualityData, 
+          sizeCounts: sizeCounts,
+          photos: photos, 
+          inspectionCompletedDate: new Date().toISOString().split('T')[0] 
+      } : d
     );
     setDeliveries(newDeliveries);
     const updatedDelivery = newDeliveries.find(d => d.id === deliveryId);
@@ -321,7 +329,7 @@ const App: React.FC = () => {
       case View.ONTVANGS_QC_LIST:
           return <OntvangsQcListPage deliveries={deliveries} onSelectDelivery={handleSelectDelivery} onSetupNewDelivery={() => handleNavigate(View.PLAAS_SETUP)} />;
       case View.ONTVANGS_QC:
-          return selectedDelivery ? <OntvangsQcPage delivery={selectedDelivery} onSaveInspection={(qualityData, defectsData, internalQualityData, photos) => handleSaveInspection(selectedDelivery.id, qualityData, defectsData, internalQualityData, photos)} commodityData={commodityData} /> : <OntvangsQcListPage deliveries={deliveries} onSelectDelivery={handleSelectDelivery} onSetupNewDelivery={() => handleNavigate(View.PLAAS_SETUP)} />;
+          return selectedDelivery ? <OntvangsQcPage delivery={selectedDelivery} onSaveInspection={(qualityData, defectsData, internalQualityData, photos, sizeCounts) => handleSaveInspection(selectedDelivery.id, qualityData, defectsData, internalQualityData, photos, sizeCounts)} commodityData={commodityData} /> : <OntvangsQcListPage deliveries={deliveries} onSelectDelivery={handleSelectDelivery} onSetupNewDelivery={() => handleNavigate(View.PLAAS_SETUP)} />;
       case View.SIZING:
         return selectedRun ? <SizingPage run={selectedRun} onSaveSizing={handleSaveSizing} commodityData={commodityData} isReadOnly={isReadOnlyView} onApprove={handleApproveQc} entryToView={entryToView} currentUser={currentUser} /> : <QcListPage runs={runs} onSelectRun={handleSelectRun} onSetupNewRun={() => handleNavigate(View.RUN_SETUP)} />;
       case View.CARTON_WEIGHTS:

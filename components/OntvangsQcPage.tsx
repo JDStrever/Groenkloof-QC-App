@@ -11,7 +11,7 @@ declare var JSZip: any;
 
 interface OntvangsQcPageProps {
   delivery: Delivery;
-  onSaveInspection: (qualityData: ExternalQualityData, defectsData: DefectsData, internalQualityData: InternalQualityData, photos: string[]) => void;
+  onSaveInspection: (qualityData: ExternalQualityData, defectsData: DefectsData, internalQualityData: InternalQualityData, photos: string[], sizeCounts: { [sizeCode: string]: number | '' }) => void;
   commodityData: CommodityData;
 }
 
@@ -29,6 +29,7 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
   const [defectsData, setDefectsData] = useState<DefectsData>({});
   const [customDefects, setCustomDefects] = useState<CustomDefect[]>([]);
   const [internalQualityData, setInternalQualityData] = useState<InternalQualityData>(initialInternalQuality);
+  const [sizeCounts, setSizeCounts] = useState<{ [sizeCode: string]: number | '' }>({});
   const [photos, setPhotos] = useState<string[]>([]);
 
   useEffect(() => {
@@ -54,6 +55,7 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
     setDefectsData(initialStandardDefects);
     setCustomDefects(initialCustomDefectState);
     setInternalQualityData(delivery.internalQuality || initialInternalQuality);
+    setSizeCounts(delivery.sizeCounts || {});
     setPhotos(delivery.photos || []);
   }, [delivery]);
 
@@ -102,6 +104,12 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
     csvContent += `"Exporter:","${delivery.exporter}"\n`;
     csvContent += `"Commodity:","${delivery.commodity}"\n`;
     csvContent += `"Variety:","${delivery.variety}"\n\n`;
+    
+    csvContent += "Aantal (Manual)\n";
+    csvContent += `"Grootte",${sizeHeaders}\n`;
+    const aantalRow = sizes.map((s: Size) => sizeCounts[s.code] || 0).join(',');
+    csvContent += `"Totaal",${aantalRow}\n\n`;
+
     csvContent += "Eksterne kwaliteit\n";
     csvContent += `"Klas / Grootte",${sizeHeaders}\n`;
     QUALITY_CLASSES.forEach(className => {
@@ -181,7 +189,7 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
             combinedDefects[defect.name.trim()] = defect.counts;
         }
     });
-    onSaveInspection(qualityData, combinedDefects, internalQualityData, photos);
+    onSaveInspection(qualityData, combinedDefects, internalQualityData, photos, sizeCounts);
   };
 
   return (
@@ -221,11 +229,13 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
             defectsData={defectsData}
             customDefects={customDefects}
             internalQualityData={internalQualityData}
+            sizeCounts={sizeCounts}
             photos={photos}
             setQualityData={setQualityData}
             setDefectsData={setDefectsData}
             setCustomDefects={setCustomDefects}
             setInternalQualityData={setInternalQualityData}
+            setSizeCounts={setSizeCounts}
             setPhotos={setPhotos}
         />
     </div>

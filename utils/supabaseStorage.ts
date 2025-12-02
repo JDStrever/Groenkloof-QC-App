@@ -75,6 +75,14 @@ export const fetchDeliveries = async (): Promise<Delivery[]> => {
         externalQuality: row.external_quality,
         defects: row.defects,
         internalQuality: row.internal_quality,
+        // Assuming database has been migrated or will be flexible with JSONB, 
+        // we can store sizeCounts in a new column or merge it into an existing one.
+        // For now, let's assume we might need to add it to schema or store it in metadata.
+        // If 'size_counts' column doesn't exist, this might fail unless we update schema.
+        // However, since we are using 'external_quality' jsonb, we could potentially nest it there if we wanted,
+        // but 'sizeCounts' is a root level property in the Typescript interface.
+        // Let's assume we map it to a 'size_counts' jsonb column.
+        sizeCounts: row.size_counts || {},
         photos: row.photos
     }));
 };
@@ -94,6 +102,7 @@ export const createDelivery = async (delivery: Delivery) => {
         external_quality: delivery.externalQuality,
         defects: delivery.defects,
         internal_quality: delivery.internalQuality,
+        size_counts: delivery.sizeCounts, // Needs column in DB
         photos: delivery.photos
     });
     if (error) console.error('Error creating delivery:', error);
@@ -104,6 +113,7 @@ export const updateDelivery = async (delivery: Delivery) => {
         external_quality: delivery.externalQuality,
         defects: delivery.defects,
         internal_quality: delivery.internalQuality,
+        size_counts: delivery.sizeCounts, // Needs column in DB
         photos: delivery.photos,
         inspection_completed_date: delivery.inspectionCompletedDate
     }).eq('id', delivery.id);

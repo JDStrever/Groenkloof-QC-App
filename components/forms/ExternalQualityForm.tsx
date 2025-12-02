@@ -21,11 +21,13 @@ interface ExternalQualityFormProps {
     defectsData: DefectsData;
     customDefects: CustomDefect[];
     internalQualityData: InternalQualityData;
+    sizeCounts: { [sizeCode: string]: number | '' };
     photos: string[];
     setQualityData: React.Dispatch<React.SetStateAction<ExternalQualityData>>;
     setDefectsData: React.Dispatch<React.SetStateAction<DefectsData>>;
     setCustomDefects: React.Dispatch<React.SetStateAction<CustomDefect[]>>;
     setInternalQualityData: React.Dispatch<React.SetStateAction<InternalQualityData>>;
+    setSizeCounts: React.Dispatch<React.SetStateAction<{ [sizeCode: string]: number | '' }>>;
     setPhotos: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
@@ -40,8 +42,8 @@ export const initialInternalQuality: InternalQualityData = {
 
 const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({ 
     delivery, onSave, commodityData,
-    qualityData, defectsData, customDefects, internalQualityData, photos,
-    setQualityData, setDefectsData, setCustomDefects, setInternalQualityData, setPhotos
+    qualityData, defectsData, customDefects, internalQualityData, sizeCounts, photos,
+    setQualityData, setDefectsData, setCustomDefects, setInternalQualityData, setSizeCounts, setPhotos
 }) => {
     const [sizes, setSizes] = useState<Size[]>([]);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -102,24 +104,26 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
         }));
     };
 
+    const handleSizeCountChange = (sizeCode: string, value: string) => {
+        const numValue = value === '' ? '' : parseInt(value, 10);
+        if (typeof numValue === 'number' && isNaN(numValue)) return;
+
+        setSizeCounts(prev => ({
+            ...prev,
+            [sizeCode]: numValue
+        }));
+    };
+
     const totalFruitCount = useMemo(() => {
         return Object.values(qualityData)
             .flatMap(sizeCounts => Object.values(sizeCounts))
             .reduce<number>((total, count) => total + (Number(count) || 0), 0);
     }, [qualityData]);
     
-    // Calculate totals per size for the "Aantal" summary
-    const totalsPerSize = useMemo(() => {
-        const totals: { [sizeCode: string]: number } = {};
-        sizes.forEach(size => {
-            let sum = 0;
-            QUALITY_CLASSES.forEach(className => {
-                sum += Number(qualityData[className]?.[size.code]) || 0;
-            });
-            totals[size.code] = sum;
-        });
-        return totals;
-    }, [qualityData, sizes]);
+    // Calculate totals for "Aantal" inputs
+    const totalAantal = useMemo(() => {
+        return Object.values(sizeCounts).reduce<number>((sum, count) => sum + (Number(count) || 0), 0);
+    }, [sizeCounts]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -167,10 +171,10 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
 
     return (
         <form onSubmit={handleSubmit}>
-            {/* Aantal Summary Section */}
+            {/* Aantal Summary Section (Now Manual) */}
             <Card className="mb-8">
                 <h3 className="text-2xl font-bold text-green-400 mb-1">Aantal</h3>
-                <p className="text-slate-400 mb-6">Totale vrugte per grootte.</p>
+                <p className="text-slate-400 mb-6">Voer die aantal vrugte per grootte in.</p>
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-slate-600 border border-slate-600 rounded-lg">
                         <thead className="bg-slate-700">
@@ -181,14 +185,42 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                         </thead>
                         <tbody className="bg-slate-800 divide-y divide-slate-600">
                             <tr>
-                                <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-slate-100">Totaal</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-slate-100">Aantal</td>
                                 {sizes.map(size => (
-                                    <td key={size.code} className="px-4 py-3 whitespace-nowrap text-center text-sm font-bold text-slate-100">
-                                        {totalsPerSize[size.code] || 0}
+                                    <td key={size.code} className="px-2 py-2 whitespace-nowrap text-sm text-slate-400 text-center">
+                                         <Input 
+                                            type="number" 
+                                            min="0"
+                                            value={sizeCounts[size.code] || ''}
+                                            onChange={(e) => handleSizeCountChange(size.code, e.target.value)}
+                                            className="w-20 text-center !text-black font-semibold px-1 py-2 !bg-white"
+                                            placeholder="0"
+                                        />
                                     </td>
                                 ))}
                             </tr>
+                            <tr>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-slate-100">%</td>
+                                {sizes.map(size => {
+                                    const count = Number(sizeCounts[size.code]) || 0;
+                                    const percentage = totalAantal > 0 ? ((count / totalAantal) * 100).toFixed(1) : '0.0';
+                                    return (
+                                        <td key={size.code} className="px-4 py-3 whitespace-nowrap text-center text-sm font-bold text-slate-300">
+                                            {percentage}%
+                                        </td>
+                                    );
+                                })}
+                            </tr>
                         </tbody>
+                        <tfoot className="bg-slate-700">
+                            <tr>
+                                <td colSpan={sizes.length + 1} className="px-4 py-3 text-right">
+                                    <p className="text-lg font-bold text-green-500">
+                                        Totaal: {totalAantal}
+                                    </p>
+                                </td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             </Card>
@@ -219,7 +251,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                                                         min="0"
                                                         value={qualityData[className]?.[size.code] || ''}
                                                         onChange={(e) => handleQualityChange(className, size.code, e.target.value)}
-                                                        className="w-20 text-center text-black font-semibold px-1 py-2"
+                                                        className="w-20 text-center !text-black font-semibold px-1 py-2 !bg-white"
                                                         placeholder="0"
                                                     />
                                                     <span className="text-xs text-slate-500 w-10 text-right">
@@ -268,7 +300,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                                                     min="0"
                                                     value={defectsData[defectName]?.[size.code] || ''}
                                                     onChange={(e) => handleDefectChange(defectName, size.code, e.target.value)}
-                                                    className="w-20 text-center text-black font-semibold px-1 py-2"
+                                                    className="w-20 text-center !text-black font-semibold px-1 py-2 !bg-white"
                                                     placeholder="0"
                                                 />
                                             </td>
@@ -282,7 +314,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                                                 type="text"
                                                 value={defect.name}
                                                 onChange={(e) => handleCustomDefectChange(index, 'name', e.target.value)}
-                                                className="w-full text-sm text-black"
+                                                className="w-full text-sm !text-black !bg-white"
                                                 placeholder="Custom defect..."
                                             />
                                         </td>
@@ -293,7 +325,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                                                     min="0"
                                                     value={defect.counts[size.code] || ''}
                                                     onChange={(e) => handleCustomDefectChange(index, size.code, e.target.value)}
-                                                    className="w-20 text-center text-black font-semibold px-1 py-2"
+                                                    className="w-20 text-center !text-black font-semibold px-1 py-2 !bg-white"
                                                     placeholder="0"
                                                     disabled={!defect.name}
                                                 />
@@ -314,15 +346,15 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div>
                             <Label htmlFor="totalMass">Total mass (g)</Label>
-                            <Input id="totalMass" name="totalMass" type="number" step="0.1" value={internalQualityData.totalMass} onChange={(e) => handleInternalQualityChange('totalMass', e.target.value)} placeholder="0.0" className="text-black" />
+                            <Input id="totalMass" name="totalMass" type="number" step="0.1" value={internalQualityData.totalMass} onChange={(e) => handleInternalQualityChange('totalMass', e.target.value)} placeholder="0.0" className="!text-black !bg-white" />
                         </div>
                         <div>
                             <Label htmlFor="peelMass">Peel mass (g)</Label>
-                            <Input id="peelMass" name="peelMass" type="number" step="0.1" value={internalQualityData.peelMass} onChange={(e) => handleInternalQualityChange('peelMass', e.target.value)} placeholder="0.0" className="text-black" />
+                            <Input id="peelMass" name="peelMass" type="number" step="0.1" value={internalQualityData.peelMass} onChange={(e) => handleInternalQualityChange('peelMass', e.target.value)} placeholder="0.0" className="!text-black !bg-white" />
                         </div>
                         <div>
                             <Label htmlFor="juiceMass">Juice mass (g)</Label>
-                            <Input id="juiceMass" name="juiceMass" type="number" step="0.1" value={internalQualityData.juiceMass} onChange={(e) => handleInternalQualityChange('juiceMass', e.target.value)} placeholder="0.0" className="text-black" />
+                            <Input id="juiceMass" name="juiceMass" type="number" step="0.1" value={internalQualityData.juiceMass} onChange={(e) => handleInternalQualityChange('juiceMass', e.target.value)} placeholder="0.0" className="!text-black !bg-white" />
                         </div>
                         <div>
                             <Label htmlFor="juicePercentage">Juice %</Label>
@@ -330,11 +362,11 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                         </div>
                         <div>
                             <Label htmlFor="brix">Brix</Label>
-                            <Input id="brix" name="brix" type="number" step="0.1" value={internalQualityData.brix} onChange={(e) => handleInternalQualityChange('brix', e.target.value)} placeholder="0.0" className="text-black" />
+                            <Input id="brix" name="brix" type="number" step="0.1" value={internalQualityData.brix} onChange={(e) => handleInternalQualityChange('brix', e.target.value)} placeholder="0.0" className="!text-black !bg-white" />
                         </div>
                         <div>
                             <Label htmlFor="titration">Titration</Label>
-                            <Input id="titration" name="titration" type="number" step="0.1" value={internalQualityData.titration} onChange={(e) => handleInternalQualityChange('titration', e.target.value)} placeholder="0.0" className="text-black" />
+                            <Input id="titration" name="titration" type="number" step="0.1" value={internalQualityData.titration} onChange={(e) => handleInternalQualityChange('titration', e.target.value)} placeholder="0.0" className="!text-black !bg-white" />
                         </div>
                         <div>
                             <Label htmlFor="acid">Acid</Label>
@@ -346,7 +378,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                         </div>
                         <div>
                             <Label htmlFor="seeds">Seeds</Label>
-                            <Input id="seeds" name="seeds" type="number" min="0" value={internalQualityData.seeds} onChange={(e) => handleInternalQualityChange('seeds', e.target.value)} placeholder="0" className="text-black" />
+                            <Input id="seeds" name="seeds" type="number" min="0" value={internalQualityData.seeds} onChange={(e) => handleInternalQualityChange('seeds', e.target.value)} placeholder="0" className="!text-black !bg-white" />
                         </div>
                     </div>
                 </Card>
