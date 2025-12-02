@@ -10,7 +10,7 @@ import Label from '../ui/Label';
 
 export interface CustomDefect {
     name: string;
-    counts: { [sizeCode: string]: number | '' };
+    count: number | '';
 }
 
 interface ExternalQualityFormProps {
@@ -62,29 +62,26 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
         }));
     };
     
-    const handleDefectChange = (defectName: string, sizeCode: string, value: string) => {
+    const handleDefectChange = (defectName: string, value: string) => {
         const numValue = value === '' ? '' : parseInt(value, 10);
         if (typeof numValue === 'number' && isNaN(numValue)) return;
 
         setDefectsData(prev => ({
             ...prev,
-            [defectName]: {
-                ...prev[defectName],
-                [sizeCode]: numValue,
-            },
+            [defectName]: numValue,
         }));
     };
 
-    const handleCustomDefectChange = (index: number, field: 'name' | string, value: string) => {
+    const handleCustomDefectChange = (index: number, field: 'name' | 'count', value: string) => {
         const newCustomDefects = [...customDefects];
         const defectToUpdate = { ...newCustomDefects[index] };
 
         if (field === 'name') {
             defectToUpdate.name = value;
-        } else { // It's a size code
+        } else { // It's count
             const numValue = value === '' ? '' : parseInt(value, 10);
             if (typeof numValue === 'number' && isNaN(numValue)) return;
-            defectToUpdate.counts = { ...defectToUpdate.counts, [field]: numValue };
+            defectToUpdate.count = numValue;
         }
         
         newCustomDefects[index] = defectToUpdate;
@@ -274,31 +271,31 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
             <div className="mt-8">
                 <Card>
                     <h3 className="text-2xl font-bold text-green-400 mb-1">Defekte gekry</h3>
-                    <p className="text-slate-400 mb-6">Voer die aantal vrugte per defek en grootte in.</p>
-                    <div className="overflow-x-auto">
+                    <p className="text-slate-400 mb-6">Voer die aantal vrugte per defek in.</p>
+                    <div className="overflow-x-auto max-w-2xl">
                         <table className="min-w-full divide-y divide-slate-600 border border-slate-600 rounded-lg">
                             <thead className="bg-slate-700">
                                 <tr>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Defek / Grootte</th>
-                                    {sizes.map(size => <th key={size.code} className="px-4 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">{size.code}</th>)}
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider w-1/2">Defek</th>
+                                    <th className="px-4 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider w-1/2">Aantal</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-slate-800 divide-y divide-slate-600">
                                 {DEFECTS.map(defectName => (
                                     <tr key={defectName}>
                                         <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-slate-100">{defectName}</td>
-                                        {sizes.map(size => (
-                                            <td key={size.code} className="px-2 py-2 whitespace-nowrap text-sm text-slate-400">
+                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-slate-400 text-center">
+                                            <div className="flex justify-center">
                                                 <Input 
                                                     type="number"
                                                     min="0"
-                                                    value={defectsData[defectName]?.[size.code] || ''}
-                                                    onChange={(e) => handleDefectChange(defectName, size.code, e.target.value)}
-                                                    className="w-20 text-center !text-black font-semibold px-1 py-2 !bg-white"
+                                                    value={defectsData[defectName] || ''}
+                                                    onChange={(e) => handleDefectChange(defectName, e.target.value)}
+                                                    className="w-24 text-center !text-black font-semibold px-1 py-2 !bg-white"
                                                     placeholder="0"
                                                 />
-                                            </td>
-                                        ))}
+                                            </div>
+                                        </td>
                                     </tr>
                                 ))}
                                 {customDefects.map((defect, index) => (
@@ -312,19 +309,19 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                                                 placeholder="Custom defect..."
                                             />
                                         </td>
-                                        {sizes.map(size => (
-                                            <td key={size.code} className="px-2 py-2 whitespace-nowrap text-sm text-slate-400">
+                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-slate-400 text-center">
+                                            <div className="flex justify-center">
                                                 <Input 
                                                     type="number"
                                                     min="0"
-                                                    value={defect.counts[size.code] || ''}
-                                                    onChange={(e) => handleCustomDefectChange(index, size.code, e.target.value)}
-                                                    className="w-20 text-center !text-black font-semibold px-1 py-2 !bg-white"
+                                                    value={defect.count}
+                                                    onChange={(e) => handleCustomDefectChange(index, 'count', e.target.value)}
+                                                    className="w-24 text-center !text-black font-semibold px-1 py-2 !bg-white"
                                                     placeholder="0"
                                                     disabled={!defect.name}
                                                 />
-                                            </td>
-                                        ))}
+                                            </div>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>

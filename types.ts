@@ -196,9 +196,7 @@ export type ExternalQualityData = {
 };
 
 export type DefectsData = {
-  [defectName: string]: {
-    [sizeCode:string]: number | '';
-  };
+  [defectName: string]: number | '';
 };
 
 export interface InternalQualityData {

@@ -39,16 +39,18 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
     const initialStandardDefects: DefectsData = {};
     const existingCustomDefects: CustomDefect[] = [];
 
-    Object.entries(allDefects).forEach(([defectName, counts]) => {
+    Object.entries(allDefects).forEach(([defectName, count]) => {
         if (standardDefectSet.has(defectName)) {
-            initialStandardDefects[defectName] = counts as { [sizeCode: string]: number | ''; };
+            // Handle legacy data where count might be an object, forcing it to number if needed or resetting
+            // For now assuming clean data or overwrite
+            initialStandardDefects[defectName] = typeof count === 'number' ? count : '';
         } else {
-            existingCustomDefects.push({ name: defectName, counts: counts as { [sizeCode: string]: number | ''; } });
+            existingCustomDefects.push({ name: defectName, count: typeof count === 'number' ? count : '' });
         }
     });
 
     const initialCustomDefectState = Array.from({ length: CUSTOM_DEFECT_COUNT }, (_, i) => 
-        existingCustomDefects[i] || { name: '', counts: {} }
+        existingCustomDefects[i] || { name: '', count: '' }
     );
 
     setQualityData(delivery.externalQuality || {});
@@ -119,20 +121,21 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
     csvContent += "\n";
 
     csvContent += "Defekte gekry\n";
-    csvContent += `"Defek / Grootte",${sizeHeaders}\n`;
+    csvContent += `"Defek","Aantal"\n`;
     
     const combinedDefects = { ...defectsData };
     customDefects.forEach(defect => {
         if (defect.name.trim() !== '') {
-            combinedDefects[defect.name.trim()] = defect.counts;
+            combinedDefects[defect.name.trim()] = defect.count;
         }
     });
 
     Object.keys(combinedDefects).forEach(defectName => {
-        const row = sizes.map((size: Size) => combinedDefects[defectName]?.[size.code] || 0).join(',');
-        csvContent += `"${defectName}",${row}\n`;
+        const count = combinedDefects[defectName] || 0;
+        csvContent += `"${defectName}",${count}\n`;
     });
     csvContent += "\n";
+
     const internalQualityLabels: { [key in InternalQualityDataKey]: string } = {
         totalMass: 'Total mass (g)', peelMass: 'Peel mass (g)', juiceMass: 'Juice mass (g)',
         juicePercentage: 'Juice %', brix: 'Brix', titration: 'Titration',
@@ -187,7 +190,7 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
     const combinedDefects = { ...defectsData };
     customDefects.forEach(defect => {
         if (defect.name.trim() !== '') {
-            combinedDefects[defect.name.trim()] = defect.counts;
+            combinedDefects[defect.name.trim()] = defect.count;
         }
     });
     onSaveInspection(qualityData, combinedDefects, internalQualityData, photos, sizeCounts);
