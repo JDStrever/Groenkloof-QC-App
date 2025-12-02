@@ -29,6 +29,7 @@ interface ExternalQualityFormProps {
     setInternalQualityData: React.Dispatch<React.SetStateAction<InternalQualityData>>;
     setSizeCounts: React.Dispatch<React.SetStateAction<{ [sizeCode: string]: number | '' }>>;
     setPhotos: React.Dispatch<React.SetStateAction<string[]>>;
+    readOnly?: boolean;
 }
 
 export const QUALITY_CLASSES = ['VSA', 'Klas 1', 'Klas 2', 'Klas 3', 'Klas 4'];
@@ -43,7 +44,8 @@ export const initialInternalQuality: InternalQualityData = {
 const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({ 
     delivery, onSave, commodityData,
     qualityData, defectsData, customDefects, internalQualityData, sizeCounts, photos,
-    setQualityData, setDefectsData, setCustomDefects, setInternalQualityData, setSizeCounts, setPhotos
+    setQualityData, setDefectsData, setCustomDefects, setInternalQualityData, setSizeCounts, setPhotos,
+    readOnly = false
 }) => {
     const [sizes, setSizes] = useState<Size[]>([]);
     const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -54,6 +56,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
     }, [delivery.commodity, commodityData]);
 
     const handleQualityChange = (className: string, value: string) => {
+        if (readOnly) return;
         const numValue = value === '' ? '' : parseInt(value, 10);
         if (typeof numValue === 'number' && isNaN(numValue)) return;
 
@@ -64,6 +67,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
     };
     
     const handleDefectChange = (defectName: string, value: string) => {
+        if (readOnly) return;
         const numValue = value === '' ? '' : parseInt(value, 10);
         if (typeof numValue === 'number' && isNaN(numValue)) return;
 
@@ -74,6 +78,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
     };
 
     const handleCustomDefectChange = (index: number, field: 'name' | 'count', value: string) => {
+        if (readOnly) return;
         const newCustomDefects = [...customDefects];
         const defectToUpdate = { ...newCustomDefects[index] };
 
@@ -90,6 +95,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
     };
 
     const handleInternalQualityChange = (field: keyof InternalQualityData, value: string) => {
+        if (readOnly) return;
         const numValue = value === '' ? '' : parseFloat(value);
         if (typeof numValue === 'number' && isNaN(numValue)) return;
 
@@ -100,6 +106,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
     };
 
     const handleSizeCountChange = (sizeCode: string, value: string) => {
+        if (readOnly) return;
         const numValue = value === '' ? '' : parseInt(value, 10);
         if (typeof numValue === 'number' && isNaN(numValue)) return;
 
@@ -121,15 +128,15 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSave();
+        if (!readOnly) onSave();
     };
 
     const handleGalleryClick = () => {
-        galleryInputRef.current?.click();
+        if (!readOnly) galleryInputRef.current?.click();
     };
 
     const handleCameraClick = () => {
-        cameraInputRef.current?.click();
+        if (!readOnly) cameraInputRef.current?.click();
     };
 
     const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -151,6 +158,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
     };
 
     const handleRemovePhoto = (indexToRemove: number) => {
+        if (readOnly) return;
         setPhotos(prev => prev.filter((_, index) => index !== indexToRemove));
     };
 
@@ -193,6 +201,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                                             onChange={(e) => handleSizeCountChange(size.code, e.target.value)}
                                             className="w-20 text-center !text-black font-semibold px-1 py-2 !bg-white"
                                             placeholder="0"
+                                            disabled={readOnly}
                                         />
                                     </td>
                                 ))}
@@ -250,6 +259,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                                                     onChange={(e) => handleQualityChange(className, e.target.value)}
                                                     className="w-24 text-center !text-black font-semibold px-2 py-2 !bg-white"
                                                     placeholder="0"
+                                                    disabled={readOnly}
                                                 />
                                                 <span className="text-xs text-slate-500 w-12 text-left">
                                                     ({percentageText}%)
@@ -298,6 +308,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                                                     onChange={(e) => handleDefectChange(defectName, e.target.value)}
                                                     className="w-24 text-center !text-black font-semibold px-1 py-2 !bg-white"
                                                     placeholder="0"
+                                                    disabled={readOnly}
                                                 />
                                             </div>
                                         </td>
@@ -312,6 +323,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                                                 onChange={(e) => handleCustomDefectChange(index, 'name', e.target.value)}
                                                 className="w-full text-sm !text-black !bg-white"
                                                 placeholder="Custom defect..."
+                                                disabled={readOnly}
                                             />
                                         </td>
                                         <td className="px-4 py-2 whitespace-nowrap text-sm text-slate-400 text-center">
@@ -323,7 +335,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                                                     onChange={(e) => handleCustomDefectChange(index, 'count', e.target.value)}
                                                     className="w-24 text-center !text-black font-semibold px-1 py-2 !bg-white"
                                                     placeholder="0"
-                                                    disabled={!defect.name}
+                                                    disabled={!defect.name || readOnly}
                                                 />
                                             </div>
                                         </td>
@@ -342,15 +354,15 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div>
                             <Label htmlFor="totalMass">Total mass (g)</Label>
-                            <Input id="totalMass" name="totalMass" type="number" step="0.1" value={internalQualityData.totalMass} onChange={(e) => handleInternalQualityChange('totalMass', e.target.value)} placeholder="0.0" className="!text-black !bg-white" />
+                            <Input id="totalMass" name="totalMass" type="number" step="0.1" value={internalQualityData.totalMass} onChange={(e) => handleInternalQualityChange('totalMass', e.target.value)} placeholder="0.0" className="!text-black !bg-white" disabled={readOnly} />
                         </div>
                         <div>
                             <Label htmlFor="peelMass">Peel mass (g)</Label>
-                            <Input id="peelMass" name="peelMass" type="number" step="0.1" value={internalQualityData.peelMass} onChange={(e) => handleInternalQualityChange('peelMass', e.target.value)} placeholder="0.0" className="!text-black !bg-white" />
+                            <Input id="peelMass" name="peelMass" type="number" step="0.1" value={internalQualityData.peelMass} onChange={(e) => handleInternalQualityChange('peelMass', e.target.value)} placeholder="0.0" className="!text-black !bg-white" disabled={readOnly} />
                         </div>
                         <div>
                             <Label htmlFor="juiceMass">Juice mass (g)</Label>
-                            <Input id="juiceMass" name="juiceMass" type="number" step="0.1" value={internalQualityData.juiceMass} onChange={(e) => handleInternalQualityChange('juiceMass', e.target.value)} placeholder="0.0" className="!text-black !bg-white" />
+                            <Input id="juiceMass" name="juiceMass" type="number" step="0.1" value={internalQualityData.juiceMass} onChange={(e) => handleInternalQualityChange('juiceMass', e.target.value)} placeholder="0.0" className="!text-black !bg-white" disabled={readOnly} />
                         </div>
                         <div>
                             <Label htmlFor="juicePercentage">Juice %</Label>
@@ -358,11 +370,11 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                         </div>
                         <div>
                             <Label htmlFor="brix">Brix</Label>
-                            <Input id="brix" name="brix" type="number" step="0.1" value={internalQualityData.brix} onChange={(e) => handleInternalQualityChange('brix', e.target.value)} placeholder="0.0" className="!text-black !bg-white" />
+                            <Input id="brix" name="brix" type="number" step="0.1" value={internalQualityData.brix} onChange={(e) => handleInternalQualityChange('brix', e.target.value)} placeholder="0.0" className="!text-black !bg-white" disabled={readOnly} />
                         </div>
                         <div>
                             <Label htmlFor="titration">Titration</Label>
-                            <Input id="titration" name="titration" type="number" step="0.1" value={internalQualityData.titration} onChange={(e) => handleInternalQualityChange('titration', e.target.value)} placeholder="0.0" className="!text-black !bg-white" />
+                            <Input id="titration" name="titration" type="number" step="0.1" value={internalQualityData.titration} onChange={(e) => handleInternalQualityChange('titration', e.target.value)} placeholder="0.0" className="!text-black !bg-white" disabled={readOnly} />
                         </div>
                         <div>
                             <Label htmlFor="acid">Acid</Label>
@@ -374,7 +386,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                         </div>
                         <div>
                             <Label htmlFor="seeds">Seeds</Label>
-                            <Input id="seeds" name="seeds" type="number" min="0" value={internalQualityData.seeds} onChange={(e) => handleInternalQualityChange('seeds', e.target.value)} placeholder="0" className="!text-black !bg-white" />
+                            <Input id="seeds" name="seeds" type="number" min="0" value={internalQualityData.seeds} onChange={(e) => handleInternalQualityChange('seeds', e.target.value)} placeholder="0" className="!text-black !bg-white" disabled={readOnly} />
                         </div>
                     </div>
                 </Card>
@@ -397,6 +409,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                         accept="image/*" 
                         multiple 
                         className="hidden" 
+                        disabled={readOnly}
                     />
 
                     {/* Camera Input (Single capture, Rear camera preferenced) */}
@@ -407,59 +420,66 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                         accept="image/*"
                         capture="environment"
                         className="hidden" 
+                        disabled={readOnly}
                     />
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         {photos.map((photo, index) => (
                             <div key={index} className="relative group aspect-square">
                                 <img src={photo} alt={`Inspection photo ${index + 1}`} className="w-full h-full object-cover rounded-lg shadow-md" />
-                                <button 
-                                    type="button" 
-                                    onClick={() => handleRemovePhoto(index)}
-                                    className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    aria-label="Remove photo"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
+                                {!readOnly && (
+                                    <button 
+                                        type="button" 
+                                        onClick={() => handleRemovePhoto(index)}
+                                        className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        aria-label="Remove photo"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                )}
                             </div>
                         ))}
                         
-                        {/* Add Photo Controls */}
-                        <div className="aspect-square flex flex-col gap-2">
-                             {/* Camera Button */}
-                            <button 
-                                type="button"
-                                onClick={handleCameraClick}
-                                className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-600 rounded-lg text-slate-400 hover:bg-slate-700 hover:border-orange-500 hover:text-orange-500 transition-colors"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2-2V9z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <span className="text-xs">Camera</span>
-                            </button>
+                        {!readOnly && (
+                            /* Add Photo Controls */
+                            <div className="aspect-square flex flex-col gap-2">
+                                {/* Camera Button */}
+                                <button 
+                                    type="button"
+                                    onClick={handleCameraClick}
+                                    className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-600 rounded-lg text-slate-400 hover:bg-slate-700 hover:border-orange-500 hover:text-orange-500 transition-colors"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2-2V9z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <span className="text-xs">Camera</span>
+                                </button>
 
-                            {/* Gallery Button */}
-                            <button 
-                                type="button"
-                                onClick={handleGalleryClick}
-                                className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-600 rounded-lg text-slate-400 hover:bg-slate-700 hover:border-blue-500 hover:text-blue-500 transition-colors"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <span className="text-xs">Gallery</span>
-                            </button>
-                        </div>
+                                {/* Gallery Button */}
+                                <button 
+                                    type="button"
+                                    onClick={handleGalleryClick}
+                                    className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-600 rounded-lg text-slate-400 hover:bg-slate-700 hover:border-blue-500 hover:text-blue-500 transition-colors"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <span className="text-xs">Gallery</span>
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </Card>
             </div>
 
-            <div className="mt-8 text-center">
-                <Button type="submit" className="w-full max-w-sm">Save Inspection</Button>
-            </div>
+            {!readOnly && (
+                <div className="mt-8 text-center">
+                    <Button type="submit" className="w-full max-w-sm">Save Inspection</Button>
+                </div>
+            )}
         </form>
     );
 };

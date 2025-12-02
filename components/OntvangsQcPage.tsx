@@ -13,6 +13,7 @@ interface OntvangsQcPageProps {
   delivery: Delivery;
   onSaveInspection: (qualityData: ExternalQualityData, defectsData: DefectsData, internalQualityData: InternalQualityData, photos: string[], sizeCounts: { [sizeCode: string]: number | '' }) => void;
   commodityData: CommodityData;
+  readOnly?: boolean;
 }
 
 const InfoPill: React.FC<{ label: string; value: string }> = ({ label, value }) => (
@@ -22,7 +23,7 @@ const InfoPill: React.FC<{ label: string; value: string }> = ({ label, value }) 
     </div>
 );
 
-const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspection, commodityData }) => {
+const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspection, commodityData, readOnly = false }) => {
   const [loading, setLoading] = useState(false);
   
   const [qualityData, setQualityData] = useState<ExternalQualityData>({});
@@ -62,6 +63,7 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
   }, [delivery]);
 
   useEffect(() => {
+      // Don't auto-calculate if read-only, although it shouldn't matter as values shouldn't change
       const totalMass = Number(internalQualityData.totalMass) || 0;
       const juiceMass = Number(internalQualityData.juiceMass) || 0;
       const brix = Number(internalQualityData.brix) || 0;
@@ -187,6 +189,7 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
   };
 
   const handleFormSave = () => {
+    if (readOnly) return;
     const combinedDefects = { ...defectsData };
     customDefects.forEach(defect => {
         if (defect.name.trim() !== '') {
@@ -201,7 +204,10 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
         <Card>
             <div className="flex flex-wrap justify-between items-start border-b border-slate-700 pb-6 mb-6 gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold text-green-400">Ontvangs QC for: {delivery.deliveryNote}</h2>
+                    <h2 className="text-3xl font-bold text-green-400">
+                        {readOnly ? 'View Record: ' : 'Ontvangs QC for: '} 
+                        {delivery.deliveryNote}
+                    </h2>
                     <p className="text-slate-400 mt-1">Details for the selected delivery are shown below.</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -222,6 +228,12 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
                 <InfoPill label="Commodity" value={delivery.commodity} />
                 <InfoPill label="Variety" value={delivery.variety} />
                 <InfoPill label="Date Received" value={delivery.dateReceived} />
+                {readOnly && delivery.inspectionCompletedDate && (
+                    <div className="bg-green-900/50 rounded-lg p-3 text-center border border-green-700">
+                        <p className="text-sm font-medium text-green-300">Completed Date</p>
+                        <p className="text-lg font-semibold text-green-100">{delivery.inspectionCompletedDate}</p>
+                    </div>
+                )}
             </div>
         </Card>
         
@@ -241,6 +253,7 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
             setInternalQualityData={setInternalQualityData}
             setSizeCounts={setSizeCounts}
             setPhotos={setPhotos}
+            readOnly={readOnly}
         />
     </div>
   );

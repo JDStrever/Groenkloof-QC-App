@@ -1,4 +1,5 @@
 
+
 export enum View {
   HOME = 'HOME',
   LOGIN = 'LOGIN',
@@ -22,6 +23,10 @@ export enum View {
   MRL = 'MRL',
   MRL_LIST = 'MRL_LIST',
   MRL_ADD = 'MRL_ADD',
+  REKORDS = 'REKORDS',
+  REKORDS_RUN_LIST = 'REKORDS_RUN_LIST',
+  REKORDS_RUN_DETAILS = 'REKORDS_RUN_DETAILS',
+  REKORDS_ONTVANGS_LIST = 'REKORDS_ONTVANGS_LIST',
 }
 
 export interface User {
