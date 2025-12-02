@@ -108,6 +108,19 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
             .reduce<number>((total, count) => total + (Number(count) || 0), 0);
     }, [qualityData]);
     
+    // Calculate totals per size for the "Aantal" summary
+    const totalsPerSize = useMemo(() => {
+        const totals: { [sizeCode: string]: number } = {};
+        sizes.forEach(size => {
+            let sum = 0;
+            QUALITY_CLASSES.forEach(className => {
+                sum += Number(qualityData[className]?.[size.code]) || 0;
+            });
+            totals[size.code] = sum;
+        });
+        return totals;
+    }, [qualityData, sizes]);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSave();
@@ -154,8 +167,34 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
 
     return (
         <form onSubmit={handleSubmit}>
+            {/* Aantal Summary Section */}
+            <Card className="mb-8">
+                <h3 className="text-2xl font-bold text-green-400 mb-1">Aantal</h3>
+                <p className="text-slate-400 mb-6">Totale vrugte per grootte.</p>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-slate-600 border border-slate-600 rounded-lg">
+                        <thead className="bg-slate-700">
+                            <tr>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Grootte</th>
+                                {sizes.map(size => <th key={size.code} className="px-4 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">{size.code}</th>)}
+                            </tr>
+                        </thead>
+                        <tbody className="bg-slate-800 divide-y divide-slate-600">
+                            <tr>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-slate-100">Totaal</td>
+                                {sizes.map(size => (
+                                    <td key={size.code} className="px-4 py-3 whitespace-nowrap text-center text-sm font-bold text-slate-100">
+                                        {totalsPerSize[size.code] || 0}
+                                    </td>
+                                ))}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </Card>
+
             <Card>
-                <h3 className="text-2xl font-bold text-slate-100 mb-1">Eksterne kwaliteit</h3>
+                <h3 className="text-2xl font-bold text-green-400 mb-1">Eksterne kwaliteit</h3>
                  <p className="text-slate-400 mb-6">Voer die aantal vrugte vir elke grootte en klas in (Teiken: {SAMPLE_TARGET} vrugte).</p>
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-slate-600 border border-slate-600 rounded-lg">
@@ -180,7 +219,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                                                         min="0"
                                                         value={qualityData[className]?.[size.code] || ''}
                                                         onChange={(e) => handleQualityChange(className, size.code, e.target.value)}
-                                                        className="w-20 text-center"
+                                                        className="w-20 text-center text-black font-semibold px-1 py-2"
                                                         placeholder="0"
                                                     />
                                                     <span className="text-xs text-slate-500 w-10 text-right">
@@ -208,7 +247,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
             
             <div className="mt-8">
                 <Card>
-                    <h3 className="text-2xl font-bold text-slate-100 mb-1">Defekte gekry</h3>
+                    <h3 className="text-2xl font-bold text-green-400 mb-1">Defekte gekry</h3>
                     <p className="text-slate-400 mb-6">Voer die aantal vrugte per defek en grootte in.</p>
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-slate-600 border border-slate-600 rounded-lg">
@@ -229,7 +268,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                                                     min="0"
                                                     value={defectsData[defectName]?.[size.code] || ''}
                                                     onChange={(e) => handleDefectChange(defectName, size.code, e.target.value)}
-                                                    className="w-20 text-center"
+                                                    className="w-20 text-center text-black font-semibold px-1 py-2"
                                                     placeholder="0"
                                                 />
                                             </td>
@@ -243,7 +282,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                                                 type="text"
                                                 value={defect.name}
                                                 onChange={(e) => handleCustomDefectChange(index, 'name', e.target.value)}
-                                                className="w-full text-sm"
+                                                className="w-full text-sm text-black"
                                                 placeholder="Custom defect..."
                                             />
                                         </td>
@@ -254,7 +293,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                                                     min="0"
                                                     value={defect.counts[size.code] || ''}
                                                     onChange={(e) => handleCustomDefectChange(index, size.code, e.target.value)}
-                                                    className="w-20 text-center"
+                                                    className="w-20 text-center text-black font-semibold px-1 py-2"
                                                     placeholder="0"
                                                     disabled={!defect.name}
                                                 />
@@ -270,44 +309,44 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
 
             <div className="mt-8">
                 <Card>
-                    <h3 className="text-2xl font-bold text-slate-100 mb-1">Interne Kwaliteit</h3>
+                    <h3 className="text-2xl font-bold text-green-400 mb-1">Interne Kwaliteit</h3>
                     <p className="text-slate-400 mb-6">Voer die interne kwaliteit toetsresultate vir die monster in.</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div>
                             <Label htmlFor="totalMass">Total mass (g)</Label>
-                            <Input id="totalMass" name="totalMass" type="number" step="0.1" value={internalQualityData.totalMass} onChange={(e) => handleInternalQualityChange('totalMass', e.target.value)} placeholder="0.0" />
+                            <Input id="totalMass" name="totalMass" type="number" step="0.1" value={internalQualityData.totalMass} onChange={(e) => handleInternalQualityChange('totalMass', e.target.value)} placeholder="0.0" className="text-black" />
                         </div>
                         <div>
                             <Label htmlFor="peelMass">Peel mass (g)</Label>
-                            <Input id="peelMass" name="peelMass" type="number" step="0.1" value={internalQualityData.peelMass} onChange={(e) => handleInternalQualityChange('peelMass', e.target.value)} placeholder="0.0" />
+                            <Input id="peelMass" name="peelMass" type="number" step="0.1" value={internalQualityData.peelMass} onChange={(e) => handleInternalQualityChange('peelMass', e.target.value)} placeholder="0.0" className="text-black" />
                         </div>
                         <div>
                             <Label htmlFor="juiceMass">Juice mass (g)</Label>
-                            <Input id="juiceMass" name="juiceMass" type="number" step="0.1" value={internalQualityData.juiceMass} onChange={(e) => handleInternalQualityChange('juiceMass', e.target.value)} placeholder="0.0" />
+                            <Input id="juiceMass" name="juiceMass" type="number" step="0.1" value={internalQualityData.juiceMass} onChange={(e) => handleInternalQualityChange('juiceMass', e.target.value)} placeholder="0.0" className="text-black" />
                         </div>
                         <div>
                             <Label htmlFor="juicePercentage">Juice %</Label>
-                            <Input id="juicePercentage" name="juicePercentage" type="number" value={internalQualityData.juicePercentage} readOnly placeholder="0.0" className="bg-slate-800 cursor-not-allowed text-slate-400" />
+                            <Input id="juicePercentage" name="juicePercentage" type="number" value={internalQualityData.juicePercentage} readOnly placeholder="0.0" className="bg-slate-800 cursor-not-allowed text-slate-400 border-slate-600" />
                         </div>
                         <div>
                             <Label htmlFor="brix">Brix</Label>
-                            <Input id="brix" name="brix" type="number" step="0.1" value={internalQualityData.brix} onChange={(e) => handleInternalQualityChange('brix', e.target.value)} placeholder="0.0" />
+                            <Input id="brix" name="brix" type="number" step="0.1" value={internalQualityData.brix} onChange={(e) => handleInternalQualityChange('brix', e.target.value)} placeholder="0.0" className="text-black" />
                         </div>
                         <div>
                             <Label htmlFor="titration">Titration</Label>
-                            <Input id="titration" name="titration" type="number" step="0.1" value={internalQualityData.titration} onChange={(e) => handleInternalQualityChange('titration', e.target.value)} placeholder="0.0" />
+                            <Input id="titration" name="titration" type="number" step="0.1" value={internalQualityData.titration} onChange={(e) => handleInternalQualityChange('titration', e.target.value)} placeholder="0.0" className="text-black" />
                         </div>
                         <div>
                             <Label htmlFor="acid">Acid</Label>
-                            <Input id="acid" name="acid" type="number" value={internalQualityData.acid} readOnly placeholder="0.00" className="bg-slate-800 cursor-not-allowed text-slate-400" />
+                            <Input id="acid" name="acid" type="number" value={internalQualityData.acid} readOnly placeholder="0.00" className="bg-slate-800 cursor-not-allowed text-slate-400 border-slate-600" />
                         </div>
                         <div>
                             <Label htmlFor="relation">Relation</Label>
-                            <Input id="relation" name="relation" type="number" value={internalQualityData.relation} readOnly placeholder="0.0" className="bg-slate-800 cursor-not-allowed text-slate-400" />
+                            <Input id="relation" name="relation" type="number" value={internalQualityData.relation} readOnly placeholder="0.0" className="bg-slate-800 cursor-not-allowed text-slate-400 border-slate-600" />
                         </div>
                         <div>
                             <Label htmlFor="seeds">Seeds</Label>
-                            <Input id="seeds" name="seeds" type="number" min="0" value={internalQualityData.seeds} onChange={(e) => handleInternalQualityChange('seeds', e.target.value)} placeholder="0" />
+                            <Input id="seeds" name="seeds" type="number" min="0" value={internalQualityData.seeds} onChange={(e) => handleInternalQualityChange('seeds', e.target.value)} placeholder="0" className="text-black" />
                         </div>
                     </div>
                 </Card>
@@ -317,7 +356,7 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                 <Card>
                     <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
                         <div>
-                            <h3 className="text-2xl font-bold text-slate-100 mb-1">Foto's</h3>
+                            <h3 className="text-2xl font-bold text-green-400 mb-1">Foto's</h3>
                             <p className="text-slate-400">Add photos for the inspection record.</p>
                         </div>
                     </div>
