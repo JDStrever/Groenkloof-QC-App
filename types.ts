@@ -110,6 +110,7 @@ export interface CartonEvaluationSample {
   };
   defects?: EvaluationDefects;
   customDefects?: CustomEvaluationDefect[];
+  photos?: string[];
 }
 
 export interface CartonEvaluationEntry {
