@@ -28,7 +28,8 @@ interface FinalPalletQcPageProps {
 
 const FinalPalletQcPage: React.FC<FinalPalletQcPageProps> = ({ run, onSave, commodityData, cartonConfig, isReadOnly = false, onApprove, entryToView, currentUser }) => {
     const [pallets, setPallets] = useState<FinalPalletQcData[]>(isReadOnly && entryToView ? entryToView.pallets : []);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const galleryInputRef = useRef<HTMLInputElement>(null);
+    const cameraInputRef = useRef<HTMLInputElement>(null);
     const [photoTarget, setPhotoTarget] = useState<{ palletId: string; photoType: PhotoType } | null>(null);
 
     const sizes: Size[] = useMemo(() => getSizesForCommodity(run.commodity, commodityData), [run.commodity, commodityData]);
@@ -58,10 +59,15 @@ const FinalPalletQcPage: React.FC<FinalPalletQcPageProps> = ({ run, onSave, comm
         ));
     };
 
-    const handleAddPhotoClick = (palletInternalId: string, photoType: PhotoType) => {
+    const handleAddPhotoClick = (palletInternalId: string, photoType: PhotoType, source: 'camera' | 'gallery') => {
         if (isReadOnly) return;
         setPhotoTarget({ palletId: palletInternalId, photoType });
-        fileInputRef.current?.click();
+        
+        if (source === 'camera') {
+            cameraInputRef.current?.click();
+        } else {
+            galleryInputRef.current?.click();
+        }
     };
     
     const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,7 +130,7 @@ const FinalPalletQcPage: React.FC<FinalPalletQcPageProps> = ({ run, onSave, comm
         return (
             <div className="flex flex-col items-center justify-center space-y-2">
                 <Label className="font-semibold text-slate-200">{label}</Label>
-                <div className="relative group w-48 h-48 bg-slate-700 rounded-lg flex items-center justify-center border-2 border-dashed border-slate-600">
+                <div className="relative group w-48 h-48 bg-slate-700 rounded-lg flex items-center justify-center border-2 border-dashed border-slate-600 overflow-hidden">
                     {photoData ? (
                         <>
                             <img src={photoData} alt={label} className="w-full h-full object-contain rounded-lg" />
@@ -142,18 +148,34 @@ const FinalPalletQcPage: React.FC<FinalPalletQcPageProps> = ({ run, onSave, comm
                             )}
                         </>
                     ) : (
-                        <button
-                            type="button"
-                            onClick={() => handleAddPhotoClick(pallet.id, photoType)}
-                            className="text-slate-400 hover:text-orange-500 transition-colors p-4 text-center disabled:cursor-not-allowed"
-                            disabled={isReadOnly}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2-2V9z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <span className="text-sm mt-1 block">Add Photo</span>
-                        </button>
+                        <div className="flex flex-col gap-3 w-full px-4">
+                            {/* Camera Button */}
+                            <button
+                                type="button"
+                                onClick={() => handleAddPhotoClick(pallet.id, photoType, 'camera')}
+                                className="flex items-center justify-center gap-2 bg-slate-600 hover:bg-orange-600 text-white py-2 rounded transition-colors disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-600"
+                                disabled={isReadOnly}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2-2V9z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span className="text-sm font-medium">Camera</span>
+                            </button>
+
+                            {/* Gallery Button */}
+                             <button
+                                type="button"
+                                onClick={() => handleAddPhotoClick(pallet.id, photoType, 'gallery')}
+                                className="flex items-center justify-center gap-2 bg-slate-600 hover:bg-blue-600 text-white py-2 rounded transition-colors disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-600"
+                                disabled={isReadOnly}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <span className="text-sm font-medium">Gallery</span>
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>
@@ -177,11 +199,21 @@ const FinalPalletQcPage: React.FC<FinalPalletQcPageProps> = ({ run, onSave, comm
                         {!isReadOnly && <Button type="button" onClick={handleAddPallet}>Add New Pallet QC</Button>}
                     </div>
 
+                    {/* Hidden Inputs */}
                     <input
                         type="file"
-                        ref={fileInputRef}
+                        ref={galleryInputRef}
                         onChange={handleFileSelected}
                         accept="image/*"
+                        className="hidden"
+                        disabled={isReadOnly}
+                    />
+                    <input
+                        type="file"
+                        ref={cameraInputRef}
+                        onChange={handleFileSelected}
+                        accept="image/*"
+                        capture="environment"
                         className="hidden"
                         disabled={isReadOnly}
                     />
