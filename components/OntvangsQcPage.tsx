@@ -190,13 +190,16 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
 
   const handleFormSave = () => {
     if (readOnly) return;
-    const combinedDefects = { ...defectsData };
-    customDefects.forEach(defect => {
-        if (defect.name.trim() !== '') {
-            combinedDefects[defect.name.trim()] = defect.count;
-        }
-    });
-    onSaveInspection(qualityData, combinedDefects, internalQualityData, photos, sizeCounts);
+    
+    if (window.confirm("Are you sure you want to complete this inspection? This will finalize the record and move it to the 'Rekords' section.")) {
+        const combinedDefects = { ...defectsData };
+        customDefects.forEach(defect => {
+            if (defect.name.trim() !== '') {
+                combinedDefects[defect.name.trim()] = defect.count;
+            }
+        });
+        onSaveInspection(qualityData, combinedDefects, internalQualityData, photos, sizeCounts);
+    }
   };
 
   return (
@@ -255,6 +258,18 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
             setPhotos={setPhotos}
             readOnly={readOnly}
         />
+        
+        {!readOnly && (
+            <div className="mt-8 text-center pb-12">
+                <Button 
+                    type="button" 
+                    onClick={handleFormSave} 
+                    className="w-full max-w-sm bg-green-600 hover:bg-green-700 focus:ring-green-500 py-4 text-lg shadow-xl transform hover:scale-105 transition-all"
+                >
+                    Complete Inspection
+                </Button>
+            </div>
+        )}
     </div>
   );
 };

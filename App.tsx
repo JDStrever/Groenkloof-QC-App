@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { View, Run, Delivery, ExternalQualityData, DefectsData, InternalQualityData, SizingData, CommodityData, CartonConfig, CartonWeightSample, CartonEvaluationSample, FinalPalletQcData, ClassEvaluationSample, SizingEntry, CartonWeightsEntry, CartonEvaluationEntry, ClassEvaluationEntry, FinalPalletQcEntry, User, MrlRecord, RunConfig, ShelfLifeBucket } from './types';
 import Header from './components/Header';
@@ -386,8 +385,9 @@ const App: React.FC = () => {
     if (updatedDelivery) {
         setSelectedDelivery(updatedDelivery);
         await supabaseStorage.updateDelivery(updatedDelivery);
+        setCurrentView(View.ONTVANGS_QC_LIST); // Navigate back to list on complete
     }
-    alert('Inspection data saved successfully!');
+    alert('Inspection completed and saved to Rekords!');
   };
 
   const updateRunStateAndDB = async (runId: string, updater: (run: Run) => Run) => {
