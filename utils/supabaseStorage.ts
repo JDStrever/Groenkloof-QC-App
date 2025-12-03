@@ -3,28 +3,49 @@
 import { supabase } from '../supabaseClient';
 import { Run, Delivery, MrlRecord, CommodityData, CartonConfig, RunConfig, User } from '../types';
 
+// --- Data Mappers ---
+
+export const mapRunFromDB = (row: any): Run => ({
+    id: row.id,
+    runNumber: row.run_number,
+    puc: row.puc,
+    farmName: row.farm_name,
+    boord: row.boord,
+    exporter: row.exporter,
+    commodity: row.commodity,
+    variety: row.variety,
+    sizingData: row.sizing_data || [],
+    cartonWeights: row.carton_weights || [],
+    cartonEvaluations: row.carton_evaluations || [],
+    classEvaluations: row.class_evaluations || [],
+    finalPalletQc: row.final_pallet_qc || [],
+    shelfLifeBuckets: row.shelf_life_buckets || []
+});
+
+export const mapDeliveryFromDB = (row: any): Delivery => ({
+    id: row.id,
+    deliveryNote: row.delivery_note,
+    dateReceived: row.date_received,
+    puc: row.puc,
+    farmName: row.farm_name,
+    boord: row.boord,
+    exporter: row.exporter,
+    commodity: row.commodity,
+    variety: row.variety,
+    inspectionCompletedDate: row.inspection_completed_date,
+    externalQuality: row.external_quality,
+    defects: row.defects,
+    internalQuality: row.internal_quality,
+    sizeCounts: row.size_counts || {},
+    photos: row.photos
+});
+
 // --- Runs ---
 
 export const fetchRuns = async (): Promise<Run[]> => {
     const { data, error } = await supabase.from('frutia_runs').select('*').order('created_at', { ascending: false });
     if (error) { console.error('Error fetching runs:', error); return []; }
-    
-    return data.map((row: any) => ({
-        id: row.id,
-        runNumber: row.run_number,
-        puc: row.puc,
-        farmName: row.farm_name,
-        boord: row.boord,
-        exporter: row.exporter,
-        commodity: row.commodity,
-        variety: row.variety,
-        sizingData: row.sizing_data || [],
-        cartonWeights: row.carton_weights || [],
-        cartonEvaluations: row.carton_evaluations || [],
-        classEvaluations: row.class_evaluations || [],
-        finalPalletQc: row.final_pallet_qc || [],
-        shelfLifeBuckets: row.shelf_life_buckets || []
-    }));
+    return data.map(mapRunFromDB);
 };
 
 export const createRun = async (run: Run) => {
@@ -77,24 +98,7 @@ export const deleteRun = async (runId: string) => {
 export const fetchDeliveries = async (): Promise<Delivery[]> => {
     const { data, error } = await supabase.from('frutia_deliveries').select('*').order('created_at', { ascending: false });
     if (error) { console.error('Error fetching deliveries:', error); return []; }
-
-    return data.map((row: any) => ({
-        id: row.id,
-        deliveryNote: row.delivery_note,
-        dateReceived: row.date_received,
-        puc: row.puc,
-        farmName: row.farm_name,
-        boord: row.boord,
-        exporter: row.exporter,
-        commodity: row.commodity,
-        variety: row.variety,
-        inspectionCompletedDate: row.inspection_completed_date,
-        externalQuality: row.external_quality,
-        defects: row.defects,
-        internalQuality: row.internal_quality,
-        sizeCounts: row.size_counts || {},
-        photos: row.photos
-    }));
+    return data.map(mapDeliveryFromDB);
 };
 
 export const createDelivery = async (delivery: Delivery) => {

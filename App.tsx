@@ -34,6 +34,7 @@ import RunRekordsPage from './components/rekords/RunRekordsPage';
 import RunRekordsDetailsPage from './components/rekords/RunRekordsDetailsPage';
 import OntvangsRekordsPage from './components/rekords/OntvangsRekordsPage';
 import * as supabaseStorage from './utils/supabaseStorage';
+import { supabase } from './supabaseClient';
 
 const PROTECTED_VIEWS: View[] = [
     View.RUN_SETUP, View.QC_LIST, View.PLAAS_SETUP, View.ONTVANGS_QC_LIST, View.MRL, View.MRL_LIST, View.MRL_ADD, View.ADMIN, View.QUALITY_SUMMARY,
@@ -126,6 +127,47 @@ const App: React.FC = () => {
         }
     };
     loadData();
+
+    // Set up Realtime Subscription
+    const channel = supabase
+      .channel('public:frutia_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'frutia_runs' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setRuns(prev => [supabaseStorage.mapRunFromDB(payload.new), ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedRun = supabaseStorage.mapRunFromDB(payload.new);
+            setRuns(prev => prev.map(r => r.id === updatedRun.id ? updatedRun : r));
+            // Update selected run if it's the one currently being viewed
+            setSelectedRun(prev => prev && prev.id === updatedRun.id ? updatedRun : prev);
+          } else if (payload.eventType === 'DELETE') {
+            setRuns(prev => prev.filter(r => r.id !== payload.old.id));
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'frutia_deliveries' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setDeliveries(prev => [supabaseStorage.mapDeliveryFromDB(payload.new), ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedDelivery = supabaseStorage.mapDeliveryFromDB(payload.new);
+            setDeliveries(prev => prev.map(d => d.id === updatedDelivery.id ? updatedDelivery : d));
+            setSelectedDelivery(prev => prev && prev.id === updatedDelivery.id ? updatedDelivery : prev);
+          } else if (payload.eventType === 'DELETE') {
+            setDeliveries(prev => prev.filter(d => d.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+
   }, []);
 
 
@@ -234,12 +276,14 @@ const App: React.FC = () => {
 
   const handleRunCreated = async (newRunData: Omit<Run, 'id'>) => {
     const newRun: Run = { ...newRunData, id: `run-${Date.now()}` };
-    setRuns(prev => [newRun, ...prev]); // Add to top
+    // Optimistic Update
+    setRuns(prev => [newRun, ...prev]); 
     setCurrentView(View.QC_LIST);
     await supabaseStorage.createRun(newRun);
   };
 
   const handleRunUpdated = async (updatedRun: Run) => {
+      // Optimistic Update
       setRuns(prev => prev.map(r => r.id === updatedRun.id ? updatedRun : r));
       setCurrentView(View.ADMIN_DATA);
       setEntryToEdit(null);
@@ -328,6 +372,7 @@ const App: React.FC = () => {
           inspectionCompletedDate: new Date().toISOString().split('T')[0] 
       } : d
     );
+    // Optimistic Update
     setDeliveries(newDeliveries);
     const updatedDelivery = newDeliveries.find(d => d.id === deliveryId);
     if (updatedDelivery) {
@@ -339,7 +384,7 @@ const App: React.FC = () => {
 
   const updateRunStateAndDB = async (runId: string, updater: (run: Run) => Run) => {
     const newRuns = runs.map(r => r.id === runId ? updater(r) : r);
-    setRuns(newRuns);
+    setRuns(newRuns); // Optimistic Update
     const updatedRun = newRuns.find(r => r.id === runId);
     if (updatedRun) {
         setSelectedRun(updatedRun);
