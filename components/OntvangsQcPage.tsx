@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Delivery, ExternalQualityData, DefectsData, InternalQualityData, InternalQualityDataKey, CommodityData, Size } from '../types';
 import Card from './ui/Card';
@@ -161,14 +162,16 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
 
         if (photos && photos.length > 0) {
             const photosFolder = zip.folder("photos");
-            photos.forEach((photoDataUrl, index) => {
-                const match = photoDataUrl.match(/^data:image\/(.+);base64,(.*)$/);
-                if (match) {
-                    const extension = match[1].split(';')[0]; // e.g., jpeg
-                    const base64Data = match[2];
-                    photosFolder.file(`photo_${index + 1}.${extension}`, base64Data, { base64: true });
-                }
-            });
+            if (photosFolder) {
+                photos.forEach((photoDataUrl, index) => {
+                    const match = photoDataUrl.match(/^data:image\/(.+);base64,(.*)$/);
+                    if (match) {
+                        const extension = match[1].split(';')[0]; // e.g., jpeg
+                        const base64Data = match[2];
+                        photosFolder.file(`photo_${index + 1}.${extension}`, base64Data, { base64: true });
+                    }
+                });
+            }
         }
 
         const zipBlob = await zip.generateAsync({ type: "blob" });
