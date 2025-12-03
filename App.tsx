@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { View, Run, Delivery, ExternalQualityData, DefectsData, InternalQualityData, SizingData, CommodityData, CartonConfig, CartonWeightSample, CartonEvaluationSample, FinalPalletQcData, ClassEvaluationSample, SizingEntry, CartonWeightsEntry, CartonEvaluationEntry, ClassEvaluationEntry, FinalPalletQcEntry, User, MrlRecord, RunConfig, ShelfLifeBucket } from './types';
 import Header from './components/Header';
@@ -70,6 +69,7 @@ const App: React.FC = () => {
   const [entryToEdit, setEntryToEdit] = useState<any>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load Data from Supabase on Mount
   useEffect(() => {
@@ -106,20 +106,27 @@ const App: React.FC = () => {
             // Handle session persistence
             const sessionUser = sessionStorage.getItem('currentUser');
             if (sessionUser) {
-                const parsedUser = JSON.parse(sessionUser);
-                // Validate if user still exists in fetched users
-                const validUser = fetchedUsers.find(u => u.username === parsedUser.username);
-                if (validUser) {
-                    setCurrentUser(validUser);
-                } else {
+                try {
+                    const parsedUser = JSON.parse(sessionUser);
+                    // Validate if user still exists in fetched users
+                    const validUser = fetchedUsers.find(u => u.username === parsedUser.username);
+                    if (validUser) {
+                        setCurrentUser(validUser);
+                    } else {
+                        sessionStorage.removeItem('currentUser');
+                        setCurrentView(View.LOGIN);
+                    }
+                } catch (e) {
+                    console.error("Error parsing session user", e);
                     sessionStorage.removeItem('currentUser');
-                    setCurrentView(View.LOGIN);
                 }
             }
 
         } catch (error) {
             console.error("Failed to load data from Supabase", error);
             alert("Failed to connect to the database. Please check your internet connection.");
+        } finally {
+            setIsLoading(false);
         }
     };
     loadData();
@@ -541,6 +548,20 @@ const App: React.FC = () => {
           handleNavigateBack();
       }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+            <svg className="animate-spin h-12 w-12 text-green-400 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <h2 className="text-xl font-semibold text-slate-100">Loading Data...</h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-slate-900 min-h-screen">

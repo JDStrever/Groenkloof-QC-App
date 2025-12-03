@@ -1,9 +1,6 @@
-
-
 import { Size, CommodityData, SizingEntry, Run, CartonWeightsEntry, CartonEvaluationEntry, ClassEvaluationEntry, FinalPalletQcEntry, CartonEvaluationSample, ClassEvaluationSample, ApprovalDetails, ShelfLifeBucket } from '../types';
 import { DEFECTS } from '../constants/commoditySizes';
-
-declare var JSZip: any;
+import JSZip from 'jszip';
 
 const commodityMap: { [key: string]: string } = {
     'orange': 'Orange',

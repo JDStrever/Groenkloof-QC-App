@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Delivery, ExternalQualityData, DefectsData, InternalQualityData, InternalQualityDataKey, CommodityData, Size } from '../types';
 import Card from './ui/Card';
@@ -6,8 +5,7 @@ import Button from './ui/Button';
 import ExternalQualityForm, { QUALITY_CLASSES, CustomDefect, initialInternalQuality, CUSTOM_DEFECT_COUNT } from './forms/ExternalQualityForm';
 import { getSizesForCommodity } from '../utils/commodityHelper';
 import { DEFECTS } from '../constants/commoditySizes';
-
-declare var JSZip: any;
+import JSZip from 'jszip';
 
 interface OntvangsQcPageProps {
   delivery: Delivery;

@@ -1,5 +1,3 @@
-
-
 import { supabase } from '../supabaseClient';
 import { Run, Delivery, MrlRecord, CommodityData, CartonConfig, RunConfig, User } from '../types';
 
@@ -45,7 +43,7 @@ export const mapDeliveryFromDB = (row: any): Delivery => ({
 export const fetchRuns = async (): Promise<Run[]> => {
     const { data, error } = await supabase.from('frutia_runs').select('*').order('created_at', { ascending: false });
     if (error) { console.error('Error fetching runs:', error); return []; }
-    return data.map(mapRunFromDB);
+    return (data || []).map(mapRunFromDB);
 };
 
 export const createRun = async (run: Run) => {
@@ -98,7 +96,7 @@ export const deleteRun = async (runId: string) => {
 export const fetchDeliveries = async (): Promise<Delivery[]> => {
     const { data, error } = await supabase.from('frutia_deliveries').select('*').order('created_at', { ascending: false });
     if (error) { console.error('Error fetching deliveries:', error); return []; }
-    return data.map(mapDeliveryFromDB);
+    return (data || []).map(mapDeliveryFromDB);
 };
 
 export const createDelivery = async (delivery: Delivery) => {
@@ -154,7 +152,7 @@ export const fetchMrls = async (): Promise<MrlRecord[]> => {
     const { data, error } = await supabase.from('frutia_mrls').select('*').order('created_at', { ascending: false });
     if (error) { console.error('Error fetching MRLs:', error); return []; }
 
-    return data.map((row: any) => ({
+    return (data || []).map((row: any) => ({
         id: row.id,
         customerRef: row.customer_ref,
         producer: row.producer,
