@@ -116,9 +116,6 @@ const App: React.FC = () => {
                     sessionStorage.removeItem('currentUser');
                     setCurrentView(View.LOGIN);
                 }
-            } else {
-                 // Removed auto-redirect to LOGIN on mount to allow landing page visibility, 
-                 // but protected views check will enforce it.
             }
 
         } catch (error) {
@@ -130,13 +127,18 @@ const App: React.FC = () => {
 
     // Set up Realtime Subscription
     const channel = supabase
-      .channel('public:frutia_changes')
+      .channel('realtime:frutia_tables')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'frutia_runs' },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            setRuns(prev => [supabaseStorage.mapRunFromDB(payload.new), ...prev]);
+            const newRun = supabaseStorage.mapRunFromDB(payload.new);
+            setRuns(prev => {
+                // Prevent duplicate if we added it optimistically
+                if (prev.some(r => r.id === newRun.id)) return prev;
+                return [newRun, ...prev];
+            });
           } else if (payload.eventType === 'UPDATE') {
             const updatedRun = supabaseStorage.mapRunFromDB(payload.new);
             setRuns(prev => prev.map(r => r.id === updatedRun.id ? updatedRun : r));
@@ -144,6 +146,7 @@ const App: React.FC = () => {
             setSelectedRun(prev => prev && prev.id === updatedRun.id ? updatedRun : prev);
           } else if (payload.eventType === 'DELETE') {
             setRuns(prev => prev.filter(r => r.id !== payload.old.id));
+            setSelectedRun(prev => prev && prev.id === payload.old.id ? null : prev);
           }
         }
       )
@@ -152,13 +155,18 @@ const App: React.FC = () => {
         { event: '*', schema: 'public', table: 'frutia_deliveries' },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            setDeliveries(prev => [supabaseStorage.mapDeliveryFromDB(payload.new), ...prev]);
+            const newDelivery = supabaseStorage.mapDeliveryFromDB(payload.new);
+            setDeliveries(prev => {
+                 if (prev.some(d => d.id === newDelivery.id)) return prev;
+                 return [newDelivery, ...prev];
+            });
           } else if (payload.eventType === 'UPDATE') {
             const updatedDelivery = supabaseStorage.mapDeliveryFromDB(payload.new);
             setDeliveries(prev => prev.map(d => d.id === updatedDelivery.id ? updatedDelivery : d));
             setSelectedDelivery(prev => prev && prev.id === updatedDelivery.id ? updatedDelivery : prev);
           } else if (payload.eventType === 'DELETE') {
             setDeliveries(prev => prev.filter(d => d.id !== payload.old.id));
+            setSelectedDelivery(prev => prev && prev.id === payload.old.id ? null : prev);
           }
         }
       )
