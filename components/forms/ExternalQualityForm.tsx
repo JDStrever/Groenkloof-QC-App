@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Delivery, ExternalQualityData, DefectsData, InternalQualityData, Size, CommodityData } from '../../types';
 import { DEFECTS } from '../../constants/commoditySizes';
@@ -39,6 +40,7 @@ export const CUSTOM_DEFECT_COUNT = 5;
 export const initialInternalQuality: InternalQualityData = {
     totalMass: '', peelMass: '', juiceMass: '', juicePercentage: '',
     brix: '', titration: '', acid: '', relation: '', seeds: '',
+    fruitsUsedForSeeds: '',
 };
 
 const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({ 
@@ -387,6 +389,10 @@ const ExternalQualityForm: React.FC<ExternalQualityFormProps> = ({
                         <div>
                             <Label htmlFor="seeds">Seeds</Label>
                             <Input id="seeds" name="seeds" type="number" min="0" value={internalQualityData.seeds} onChange={(e) => handleInternalQualityChange('seeds', e.target.value)} placeholder="0" className="!text-black !bg-white" disabled={readOnly} />
+                        </div>
+                        <div>
+                            <Label htmlFor="fruitsUsedForSeeds"># Fruits used for Seeds</Label>
+                            <Input id="fruitsUsedForSeeds" name="fruitsUsedForSeeds" type="number" min="0" value={internalQualityData.fruitsUsedForSeeds ?? ''} onChange={(e) => handleInternalQualityChange('fruitsUsedForSeeds', e.target.value)} placeholder="0" className="!text-black !bg-white" disabled={readOnly} />
                         </div>
                     </div>
                 </Card>

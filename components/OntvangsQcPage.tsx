@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { Delivery, ExternalQualityData, DefectsData, InternalQualityData, InternalQualityDataKey, CommodityData, Size } from '../types';
 import Card from './ui/Card';
@@ -50,7 +51,7 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
     });
 
     const initialCustomDefectState = Array.from({ length: CUSTOM_DEFECT_COUNT }, (_, i) => 
-        existingCustomDefects[i] || { name: '', count: '' }
+        existingCustomDefects[i] || { name: '', count: '' } as CustomDefect
     );
 
     setQualityData(delivery.externalQuality || {});
@@ -141,6 +142,7 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
         totalMass: 'Total mass (g)', peelMass: 'Peel mass (g)', juiceMass: 'Juice mass (g)',
         juicePercentage: 'Juice %', brix: 'Brix', titration: 'Titration',
         acid: 'Acid', relation: 'Relation', seeds: 'Seeds',
+        fruitsUsedForSeeds: 'Fruits Used for Seeds'
     };
     csvContent += "Interne Kwaliteit\n";
     csvContent += "Metric,Value\n";

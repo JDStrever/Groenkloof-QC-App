@@ -237,6 +237,7 @@ export interface InternalQualityData {
   acid: number | '';
   relation: number | '';
   seeds: number | '';
+  fruitsUsedForSeeds?: number | '';
 }
 
 export type InternalQualityDataKey = keyof InternalQualityData;
