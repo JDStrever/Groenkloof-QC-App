@@ -354,21 +354,24 @@ const ClassEvaluationPage: React.FC<ClassEvaluationPageProps> = ({ run, onSaveCl
                           </div>
                           
                           {/* Photo controls for this class */}
-                          <div className="flex flex-wrap gap-2 mt-2">
-                              {currentPhotos.map((photo, pIdx) => (
-                                  <div key={pIdx} className="relative group w-10 h-10">
-                                      <img src={photo} className="w-full h-full object-cover rounded border border-slate-600" />
-                                      {!isReadOnly && <button type="button" onClick={() => handleRemovePhoto(sample.id, 'class', pIdx, key)} className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100">X</button>}
-                                  </div>
-                              ))}
-                              {!isReadOnly && (
-                                <div className="flex gap-1">
-                                    <button type="button" onClick={() => handleAddPhotoClick({ sampleId: sample.id, type: 'class', key }, 'camera')} className="bg-slate-600 p-1 rounded text-white hover:bg-orange-600"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg></button>
-                                    <button type="button" onClick={() => handleAddPhotoClick({ sampleId: sample.id, type: 'class', key }, 'gallery')} className="bg-slate-600 p-1 rounded text-white hover:bg-blue-600"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></button>
-                                </div>
-                              )}
+                          <div className="mt-3 border-t border-slate-600 pt-2">
+                              <h5 className="text-xs font-semibold text-slate-300 mb-2">Fotos: {label}</h5>
+                              <div className="flex flex-wrap gap-2">
+                                  {currentPhotos.map((photo, pIdx) => (
+                                      <div key={pIdx} className="relative group w-10 h-10">
+                                          <img src={photo} className="w-full h-full object-cover rounded border border-slate-600" />
+                                          {!isReadOnly && <button type="button" onClick={() => handleRemovePhoto(sample.id, 'class', pIdx, key)} className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100">X</button>}
+                                      </div>
+                                  ))}
+                                  {!isReadOnly && (
+                                    <div className="flex gap-1">
+                                        <button type="button" onClick={() => handleAddPhotoClick({ sampleId: sample.id, type: 'class', key }, 'camera')} className="bg-slate-600 p-1 rounded text-white hover:bg-orange-600"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg></button>
+                                        <button type="button" onClick={() => handleAddPhotoClick({ sampleId: sample.id, type: 'class', key }, 'gallery')} className="bg-slate-600 p-1 rounded text-white hover:bg-blue-600"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></button>
+                                    </div>
+                                  )}
+                              </div>
+                              {countValue > 0 && currentPhotos.length === 0 && <p className="text-[10px] text-red-400 mt-1 font-bold">Photo required</p>}
                           </div>
-                          {countValue > 0 && currentPhotos.length === 0 && <p className="text-[10px] text-red-400 mt-1 font-bold">Photo required</p>}
                         </div>
                       );
                     })}
@@ -441,7 +444,7 @@ const ClassEvaluationPage: React.FC<ClassEvaluationPageProps> = ({ run, onSaveCl
 
                   {/* Defect Photos Section */}
                   <div className="mt-6 pt-4 border-t border-slate-700">
-                      <h4 className="text-sm font-semibold text-slate-300 mb-3">Defect Photos</h4>
+                      <h4 className="text-sm font-bold text-slate-300 mb-3 uppercase tracking-wide">Defekte Fotos</h4>
                       <div className="flex flex-wrap gap-2">
                           {sample.defectPhotos?.map((photo, pIdx) => (
                               <div key={pIdx} className="relative group w-16 h-16">
