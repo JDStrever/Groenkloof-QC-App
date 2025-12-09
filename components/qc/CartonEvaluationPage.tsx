@@ -35,7 +35,9 @@ const CartonEvaluationPage: React.FC<CartonEvaluationPageProps> = ({ run, onSave
                 sampleSize: sample.sampleSize || '',
                 defects: sample.defects || {},
                 customDefects: paddedCustoms,
-                photos: sample.photos || []
+                photos: sample.photos || [],
+                classPhotos: sample.classPhotos || {},
+                defectPhotos: sample.defectPhotos || []
             };
         });
     }
@@ -48,7 +50,7 @@ const CartonEvaluationPage: React.FC<CartonEvaluationPageProps> = ({ run, onSave
   // Photo handling
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  const [activePhotoSampleId, setActivePhotoSampleId] = useState<string | null>(null);
+  const [activePhotoContext, setActivePhotoContext] = useState<{ sampleId: string, type: 'class' | 'defects', key?: string } | null>(null);
 
   const sizes: Size[] = useMemo(() => getSizesForCommodity(run.commodity, commodityData), [run.commodity, commodityData]);
   const mappedCommodity = useMemo(() => getMappedCommodity(run.commodity), [run.commodity]);
@@ -69,7 +71,9 @@ const CartonEvaluationPage: React.FC<CartonEvaluationPageProps> = ({ run, onSave
       counts: { vsa: '', klas1: '', klas2: '', klas3: '' },
       defects: {},
       customDefects: Array.from({ length: CUSTOM_DEFECT_COUNT }, () => ({ name: '', counts: { klas1: '', klas2: '', klas3: '' } })),
-      photos: []
+      photos: [],
+      classPhotos: {},
+      defectPhotos: []
     };
     setSamples(prev => [...prev, newSample]);
     setNewSampleSize('');
@@ -139,9 +143,9 @@ const CartonEvaluationPage: React.FC<CartonEvaluationPageProps> = ({ run, onSave
 
   // --- Photo Handling ---
 
-  const handleAddPhotoClick = (sampleId: string, source: 'camera' | 'gallery') => {
+  const handleAddPhotoClick = (context: { sampleId: string, type: 'class' | 'defects', key?: string }, source: 'camera' | 'gallery') => {
       if (isReadOnly) return;
-      setActivePhotoSampleId(sampleId);
+      setActivePhotoContext(context);
       if (source === 'camera') {
           cameraInputRef.current?.click();
       } else {
@@ -151,9 +155,8 @@ const CartonEvaluationPage: React.FC<CartonEvaluationPageProps> = ({ run, onSave
 
   const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
-      if (!files || files.length === 0 || !activePhotoSampleId) return;
+      if (!files || files.length === 0 || !activePhotoContext) return;
 
-      // Process multiple files
       for (let i = 0; i < files.length; i++) {
           const file = files[i];
           const reader = new FileReader();
@@ -161,8 +164,14 @@ const CartonEvaluationPage: React.FC<CartonEvaluationPageProps> = ({ run, onSave
               if (loadEvent.target?.result) {
                   const base64Data = loadEvent.target.result as string;
                   setSamples(prev => prev.map(sample => {
-                      if (sample.id === activePhotoSampleId) {
-                          return { ...sample, photos: [...(sample.photos || []), base64Data] };
+                      if (sample.id === activePhotoContext.sampleId) {
+                          if (activePhotoContext.type === 'class' && activePhotoContext.key) {
+                              const newClassPhotos = { ...sample.classPhotos };
+                              newClassPhotos[activePhotoContext.key] = [...(newClassPhotos[activePhotoContext.key] || []), base64Data];
+                              return { ...sample, classPhotos: newClassPhotos };
+                          } else if (activePhotoContext.type === 'defects') {
+                              return { ...sample, defectPhotos: [...(sample.defectPhotos || []), base64Data] };
+                          }
                       }
                       return sample;
                   }));
@@ -172,16 +181,21 @@ const CartonEvaluationPage: React.FC<CartonEvaluationPageProps> = ({ run, onSave
       }
       
       e.target.value = '';
-      setActivePhotoSampleId(null);
+      setActivePhotoContext(null);
   };
 
-  const handleRemovePhoto = (sampleId: string, photoIndex: number) => {
+  const handleRemovePhoto = (sampleId: string, type: 'class' | 'defects', index: number, key?: string) => {
       if (isReadOnly) return;
       setSamples(prev => prev.map(sample => {
           if (sample.id === sampleId) {
-              const newPhotos = [...(sample.photos || [])];
-              newPhotos.splice(photoIndex, 1);
-              return { ...sample, photos: newPhotos };
+              if (type === 'class' && key) {
+                  const newClassPhotos = { ...sample.classPhotos };
+                  newClassPhotos[key] = (newClassPhotos[key] || []).filter((_, i) => i !== index);
+                  return { ...sample, classPhotos: newClassPhotos };
+              } else if (type === 'defects') {
+                  const newDefectPhotos = (sample.defectPhotos || []).filter((_, i) => i !== index);
+                  return { ...sample, defectPhotos: newDefectPhotos };
+              }
           }
           return sample;
       }));
@@ -189,9 +203,28 @@ const CartonEvaluationPage: React.FC<CartonEvaluationPageProps> = ({ run, onSave
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isReadOnly) {
-        onSaveCartonEvaluation(run.id, samples);
+    if (isReadOnly) return;
+
+    // Validation: Check if photos exist for classes with counts > 0
+    const errors: string[] = [];
+    samples.forEach((sample, idx) => {
+        ['vsa', 'klas1', 'klas2', 'klas3'].forEach(key => {
+            const count = Number(sample.counts[key as keyof typeof sample.counts]);
+            if (count > 0) {
+                const hasPhotos = sample.classPhotos?.[key] && sample.classPhotos[key].length > 0;
+                if (!hasPhotos) {
+                    errors.push(`Sample ${idx + 1}: Photos missing for ${key.toUpperCase()}`);
+                }
+            }
+        });
+    });
+
+    if (errors.length > 0) {
+        alert("Validation Error:\n" + errors.join("\n"));
+        return;
     }
+
+    onSaveCartonEvaluation(run.id, samples);
   };
 
   const handleApproveClick = () => {
@@ -209,11 +242,9 @@ const CartonEvaluationPage: React.FC<CartonEvaluationPageProps> = ({ run, onSave
   
   const getTotalDefects = (sample: CartonEvaluationSample): number => {
       let total = 0;
-      // Standard defects
       Object.values(sample.defects || {}).forEach(d => {
           total += (Number(d.klas1)||0) + (Number(d.klas2)||0) + (Number(d.klas3)||0);
       });
-      // Custom defects
       sample.customDefects?.forEach(d => {
           total += (Number(d.counts.klas1)||0) + (Number(d.counts.klas2)||0) + (Number(d.counts.klas3)||0);
       });
@@ -315,25 +346,44 @@ const CartonEvaluationPage: React.FC<CartonEvaluationPageProps> = ({ run, onSave
                     <Label htmlFor={`sample-size-${sample.id}`}>Sample Grootte</Label>
                     <Input id={`sample-size-${sample.id}`} type="number" min="1" placeholder="Total fruit in sample" value={sample.sampleSize} onChange={(e) => handleSampleSizeChange(sample.id, e.target.value)} className="w-full max-w-xs" required disabled={isReadOnly} />
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-x-6 gap-y-4 items-end">
+                  
+                  {/* Counts and Photos Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {(['vsa', 'klas1', 'klas2', 'klas3'] as const).map(key => {
-                      const percentage = sampleSize > 0 ? ((Number(sample.counts[key]) || 0) / sampleSize) * 100 : 0;
+                      const countValue = Number(sample.counts[key]) || 0;
+                      const percentage = sampleSize > 0 ? (countValue / sampleSize) * 100 : 0;
                       const label = key.charAt(0).toUpperCase() + key.slice(1).replace('klas', 'Klas ');
+                      const currentPhotos = sample.classPhotos?.[key] || [];
+
                       return (
-                        <div key={key}>
+                        <div key={key} className="bg-slate-700/50 p-3 rounded-lg border border-slate-700">
                           <Label htmlFor={`count-${key}-${sample.id}`}>{label}</Label>
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-2 mb-2">
                             <Input id={`count-${key}-${sample.id}`} type="number" min="0" placeholder="0" value={sample.counts[key]} onChange={(e) => handleCountChange(sample.id, key, e.target.value)} className="w-full text-center" disabled={isReadOnly} />
                             <span className="text-xs text-slate-500 w-12 text-right">({percentage.toFixed(1)}%)</span>
                           </div>
+                          
+                          {/* Photo controls for this class */}
+                          <div className="flex flex-wrap gap-2 mt-2">
+                              {currentPhotos.map((photo, pIdx) => (
+                                  <div key={pIdx} className="relative group w-10 h-10">
+                                      <img src={photo} className="w-full h-full object-cover rounded border border-slate-600" />
+                                      {!isReadOnly && <button type="button" onClick={() => handleRemovePhoto(sample.id, 'class', pIdx, key)} className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100">X</button>}
+                                  </div>
+                              ))}
+                              {!isReadOnly && (
+                                <div className="flex gap-1">
+                                    <button type="button" onClick={() => handleAddPhotoClick({ sampleId: sample.id, type: 'class', key }, 'camera')} className="bg-slate-600 p-1 rounded text-white hover:bg-orange-600"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg></button>
+                                    <button type="button" onClick={() => handleAddPhotoClick({ sampleId: sample.id, type: 'class', key }, 'gallery')} className="bg-slate-600 p-1 rounded text-white hover:bg-blue-600"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></button>
+                                </div>
+                              )}
+                          </div>
+                          {countValue > 0 && currentPhotos.length === 0 && <p className="text-[10px] text-red-400 mt-1 font-bold">Photo required</p>}
                         </div>
                       );
                     })}
-                    <div className="bg-slate-700 p-3 rounded-lg text-center h-full flex flex-col justify-center border border-slate-600">
-                      <p className="text-sm font-medium text-slate-400">Total Vrugte</p>
-                      <p className="text-lg font-bold text-slate-200">{totalCount}</p>
-                    </div>
                   </div>
+
                   <div className="mt-8 pt-6 border-t border-slate-700">
                     <h4 className="text-lg font-semibold text-slate-200 mb-4">Defekte gekry per klas</h4>
                     <div className="overflow-x-auto">
@@ -344,7 +394,7 @@ const CartonEvaluationPage: React.FC<CartonEvaluationPageProps> = ({ run, onSave
                             <th className="px-4 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Klas 1</th>
                             <th className="px-4 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Klas 2</th>
                             <th className="px-4 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Klas 3</th>
-                            <th className="px-4 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Totaal (% van monster)</th>
+                            <th className="px-4 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Totaal</th>
                           </tr>
                         </thead>
                         <tbody className="bg-slate-800 divide-y divide-slate-600">
@@ -399,51 +449,21 @@ const CartonEvaluationPage: React.FC<CartonEvaluationPageProps> = ({ run, onSave
                     </div>
                   </div>
 
-                  {/* Photos Section */}
-                  <div className="mt-8 pt-6 border-t border-slate-700">
-                      <h4 className="text-lg font-semibold text-green-400 mb-4">Sample Photos</h4>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                          {sample.photos?.map((photo, pIndex) => (
-                              <div key={pIndex} className="relative group aspect-square">
-                                  <img src={photo} alt={`Sample photo ${pIndex + 1}`} className="w-full h-full object-cover rounded-lg shadow-md border border-slate-600" />
-                                  {!isReadOnly && (
-                                      <button 
-                                          type="button" 
-                                          onClick={() => handleRemovePhoto(sample.id, pIndex)}
-                                          className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                                      >
-                                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                          </svg>
-                                      </button>
-                                  )}
+                  {/* Defect Photos Section */}
+                  <div className="mt-6 pt-4 border-t border-slate-700">
+                      <h4 className="text-sm font-semibold text-slate-300 mb-3">Defect Photos</h4>
+                      <div className="flex flex-wrap gap-2">
+                          {sample.defectPhotos?.map((photo, pIdx) => (
+                              <div key={pIdx} className="relative group w-16 h-16">
+                                  <img src={photo} className="w-full h-full object-cover rounded border border-slate-600" />
+                                  {!isReadOnly && <button type="button" onClick={() => handleRemovePhoto(sample.id, 'defects', pIdx)} className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100">X</button>}
                               </div>
                           ))}
-                          
                           {!isReadOnly && (
-                              <div className="aspect-square flex flex-col gap-2">
-                                  <button 
-                                      type="button"
-                                      onClick={() => handleAddPhotoClick(sample.id, 'camera')}
-                                      className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-600 rounded-lg text-slate-400 hover:bg-slate-700 hover:border-orange-500 hover:text-orange-500 transition-colors"
-                                  >
-                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2-2V9z" />
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                      </svg>
-                                      <span className="text-xs">Camera</span>
-                                  </button>
-                                  <button 
-                                      type="button"
-                                      onClick={() => handleAddPhotoClick(sample.id, 'gallery')}
-                                      className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-600 rounded-lg text-slate-400 hover:bg-slate-700 hover:border-blue-500 hover:text-blue-500 transition-colors"
-                                  >
-                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                      </svg>
-                                      <span className="text-xs">Gallery</span>
-                                  </button>
-                              </div>
+                            <div className="flex flex-col gap-1 justify-center">
+                                <button type="button" onClick={() => handleAddPhotoClick({ sampleId: sample.id, type: 'defects' }, 'camera')} className="bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600 hover:bg-orange-600 text-white">Cam</button>
+                                <button type="button" onClick={() => handleAddPhotoClick({ sampleId: sample.id, type: 'defects' }, 'gallery')} className="bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600 hover:bg-blue-600 text-white">Gal</button>
+                            </div>
                           )}
                       </div>
                   </div>

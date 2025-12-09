@@ -113,7 +113,9 @@ export interface CartonEvaluationSample {
   };
   defects?: EvaluationDefects;
   customDefects?: CustomEvaluationDefect[];
-  photos?: string[];
+  photos?: string[]; // Legacy
+  classPhotos?: { [key: string]: string[] };
+  defectPhotos?: string[];
 }
 
 export interface CartonEvaluationEntry {
@@ -137,7 +139,9 @@ export interface ClassEvaluationSample {
   };
   defects?: EvaluationDefects;
   customDefects?: CustomEvaluationDefect[];
-  photos?: string[];
+  photos?: string[]; // Legacy
+  classPhotos?: { [key: string]: string[] };
+  defectPhotos?: string[];
 }
 
 export interface ClassEvaluationEntry {
