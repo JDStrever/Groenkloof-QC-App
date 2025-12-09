@@ -71,6 +71,7 @@ export interface CartonWeightSample {
   class: string;
   boxType: string;
   weights: (number | '')[];
+  photo?: string;
 }
 
 export interface CartonWeightsEntry {
