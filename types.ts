@@ -258,7 +258,9 @@ export interface Delivery {
   internalQuality?: InternalQualityData;
   sizeCounts?: { [sizeCode: string]: number | '' };
   inspectionCompletedDate?: string;
-  photos?: string[];
+  photos?: string[]; // Legacy photos
+  externalQualityPhotos?: { [className: string]: string[] };
+  defectsPhotos?: string[];
 }
 
 export interface MrlResidues {

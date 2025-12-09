@@ -1,3 +1,4 @@
+
 import { supabase } from '../supabaseClient';
 import { Run, Delivery, MrlRecord, CommodityData, CartonConfig, RunConfig, User } from '../types';
 
@@ -35,7 +36,9 @@ export const mapDeliveryFromDB = (row: any): Delivery => ({
     defects: row.defects,
     internalQuality: row.internal_quality,
     sizeCounts: row.size_counts || {},
-    photos: row.photos
+    photos: row.photos,
+    externalQualityPhotos: row.external_quality_photos || {},
+    defectsPhotos: row.defects_photos || []
 });
 
 // --- Runs ---
@@ -115,7 +118,9 @@ export const createDelivery = async (delivery: Delivery) => {
         defects: delivery.defects,
         internal_quality: delivery.internalQuality,
         size_counts: delivery.sizeCounts,
-        photos: delivery.photos
+        photos: delivery.photos,
+        external_quality_photos: delivery.externalQualityPhotos,
+        defects_photos: delivery.defectsPhotos
     });
     if (error) console.error('Error creating delivery:', error);
 };
@@ -136,7 +141,9 @@ export const updateDelivery = async (delivery: Delivery) => {
         internal_quality: delivery.internalQuality,
         size_counts: delivery.sizeCounts,
         photos: delivery.photos,
-        inspection_completed_date: delivery.inspectionCompletedDate
+        inspection_completed_date: delivery.inspectionCompletedDate,
+        external_quality_photos: delivery.externalQualityPhotos,
+        defects_photos: delivery.defectsPhotos
     }).eq('id', delivery.id);
     if (error) console.error('Error updating delivery:', error);
 };

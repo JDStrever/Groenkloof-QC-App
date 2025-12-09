@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { Delivery, ExternalQualityData, DefectsData, InternalQualityData, InternalQualityDataKey, CommodityData, Size } from '../types';
 import Card from './ui/Card';
@@ -11,7 +10,15 @@ import JSZip from 'jszip';
 
 interface OntvangsQcPageProps {
   delivery: Delivery;
-  onSaveInspection: (qualityData: ExternalQualityData, defectsData: DefectsData, internalQualityData: InternalQualityData, photos: string[], sizeCounts: { [sizeCode: string]: number | '' }) => void;
+  onSaveInspection: (
+      qualityData: ExternalQualityData, 
+      defectsData: DefectsData, 
+      internalQualityData: InternalQualityData, 
+      photos: string[], 
+      sizeCounts: { [sizeCode: string]: number | '' },
+      externalQualityPhotos: { [className: string]: string[] },
+      defectsPhotos: string[]
+    ) => void;
   commodityData: CommodityData;
   readOnly?: boolean;
 }
@@ -32,6 +39,10 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
   const [internalQualityData, setInternalQualityData] = useState<InternalQualityData>(initialInternalQuality);
   const [sizeCounts, setSizeCounts] = useState<{ [sizeCode: string]: number | '' }>({});
   const [photos, setPhotos] = useState<string[]>([]);
+  
+  // New Photo States
+  const [externalQualityPhotos, setExternalQualityPhotos] = useState<{ [className: string]: string[] }>({});
+  const [defectsPhotos, setDefectsPhotos] = useState<string[]>([]);
 
   useEffect(() => {
     const allDefects = delivery.defects || {};
@@ -42,8 +53,6 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
 
     Object.entries(allDefects).forEach(([defectName, count]) => {
         if (standardDefectSet.has(defectName)) {
-            // Handle legacy data where count might be an object, forcing it to number if needed or resetting
-            // For now assuming clean data or overwrite
             initialStandardDefects[defectName] = typeof count === 'number' ? count : '';
         } else {
             existingCustomDefects.push({ name: defectName, count: typeof count === 'number' ? count : '' });
@@ -60,10 +69,12 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
     setInternalQualityData(delivery.internalQuality || initialInternalQuality);
     setSizeCounts(delivery.sizeCounts || {});
     setPhotos(delivery.photos || []);
+    setExternalQualityPhotos(delivery.externalQualityPhotos || {});
+    setDefectsPhotos(delivery.defectsPhotos || []);
   }, [delivery]);
 
   useEffect(() => {
-      // Don't auto-calculate if read-only, although it shouldn't matter as values shouldn't change
+      // Auto-calculate internal quality ratios
       const totalMass = Number(internalQualityData.totalMass) || 0;
       const juiceMass = Number(internalQualityData.juiceMass) || 0;
       const brix = Number(internalQualityData.brix) || 0;
@@ -162,16 +173,31 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
 
         zip.file(`QC_Report_${delivery.deliveryNote}.csv`, csvContent);
 
-        if (photos && photos.length > 0) {
-            const photosFolder = zip.folder("photos");
-            if (photosFolder) {
+        const photosFolder = zip.folder("photos");
+        if (photosFolder) {
+            // Legacy Photos
+            if (photos && photos.length > 0) {
+                const legacyFolder = photosFolder.folder("general");
                 photos.forEach((photoDataUrl, index) => {
-                    const match = photoDataUrl.match(/^data:image\/(.+);base64,(.*)$/);
-                    if (match) {
-                        const extension = match[1].split(';')[0]; // e.g., jpeg
-                        const base64Data = match[2];
-                        photosFolder.file(`photo_${index + 1}.${extension}`, base64Data, { base64: true });
-                    }
+                   savePhotoToZip(legacyFolder, photoDataUrl, `photo_${index + 1}`);
+                });
+            }
+
+            // External Quality Photos
+            Object.entries(externalQualityPhotos).forEach(([className, classPhotos]) => {
+                if (classPhotos && classPhotos.length > 0) {
+                    const classFolder = photosFolder.folder(`external_${className.replace(/\s+/g, '_')}`);
+                    classPhotos.forEach((photo, index) => {
+                        savePhotoToZip(classFolder, photo, `photo_${index + 1}`);
+                    });
+                }
+            });
+
+            // Defects Photos
+            if (defectsPhotos && defectsPhotos.length > 0) {
+                const defectFolder = photosFolder.folder("defects");
+                defectsPhotos.forEach((photo, index) => {
+                    savePhotoToZip(defectFolder, photo, `photo_${index + 1}`);
                 });
             }
         }
@@ -191,6 +217,16 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
     }
   };
 
+  const savePhotoToZip = (folder: JSZip | null, photoDataUrl: string, filename: string) => {
+      if (!folder) return;
+      const match = photoDataUrl.match(/^data:image\/(.+);base64,(.*)$/);
+      if (match) {
+          const extension = match[1].split(';')[0];
+          const base64Data = match[2];
+          folder.file(`${filename}.${extension}`, base64Data, { base64: true });
+      }
+  };
+
   const handleFormSave = () => {
     if (readOnly) return;
     
@@ -201,7 +237,7 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
                 combinedDefects[defect.name.trim()] = defect.count;
             }
         });
-        onSaveInspection(qualityData, combinedDefects, internalQualityData, photos, sizeCounts);
+        onSaveInspection(qualityData, combinedDefects, internalQualityData, photos, sizeCounts, externalQualityPhotos, defectsPhotos);
     }
   };
 
@@ -252,13 +288,15 @@ const OntvangsQcPage: React.FC<OntvangsQcPageProps> = ({ delivery, onSaveInspect
             customDefects={customDefects}
             internalQualityData={internalQualityData}
             sizeCounts={sizeCounts}
-            photos={photos}
+            externalQualityPhotos={externalQualityPhotos}
+            defectsPhotos={defectsPhotos}
             setQualityData={setQualityData}
             setDefectsData={setDefectsData}
             setCustomDefects={setCustomDefects}
             setInternalQualityData={setInternalQualityData}
             setSizeCounts={setSizeCounts}
-            setPhotos={setPhotos}
+            setExternalQualityPhotos={setExternalQualityPhotos}
+            setDefectsPhotos={setDefectsPhotos}
             readOnly={readOnly}
         />
         
